@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300&display=swap');
+
+body {
+  font-family: 'Comfortaa', cursive;
+
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.App {
+  text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+h1 {
+  font-size: 100px;
+  color: rgba(175, 47, 47, 0.15);
+  font-weight: 100;
+  margin: 0;
+}
+
+.efficiency {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 20px;
+  color: #ffcc00;
+}
+
+.todo-container {
+  background: white;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 400px;
+  border-radius: 10px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  position: relative;
+}
+
+li.completed span {
+  text-decoration: line-through;
+  color: #d9d9d9;
+}
+
+input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+button {
+  background: none;
+  border: none;
+  color: #cc9a9a;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  color: #af5b5e;
+}
+
+.points {
+  margin-left: auto;
+  margin-right: 10px;
+  color: #ffcc00;
+  animation: pointsAnimation 1s forwards;
+}
+
+@keyframes pointsAnimation {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+@keyframes fly {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+li.completed .points {
+  animation: fly 1s forwards;
+}
+
+.shop {
+  margin-top: 20px;
+}
+
+.shop ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.shop li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.shop .price {
+  color: #ffcc00;
+}
+
+.pet {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pet-image {
+  font-size: 50px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.pet-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pet-item {
+  margin-top: 10px;
+  background: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
