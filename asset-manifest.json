@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/gropy/static/css/main.3cc283d4.css",
+    "main.js": "/gropy/static/js/main.00ac081d.js",
+    "index.html": "/gropy/index.html",
+    "main.3cc283d4.css.map": "/gropy/static/css/main.3cc283d4.css.map",
+    "main.00ac081d.js.map": "/gropy/static/js/main.00ac081d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3cc283d4.css",
+    "static/js/main.00ac081d.js"
+  ]
+}
