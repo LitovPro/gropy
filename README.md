@@ -1,6 +1,41 @@
 # 🌸 Gropy - Твой добрый помощник в делах
 
-Мягкий планировщик задач, созданный для поддержки ментального здоровья. Gropy помогает организовать дела без стресса и чувства вины, превращая повседневные задачи в приятный опыт с милым виртуальным питомцем.
+<div align="center">
+
+![Gropy Logo](https://img.shields.io/badge/Gropy-v1.0.0-6366f1?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K)
+
+[![Demo](https://img.shields.io/badge/🚀_Попробовать-Gropy-success?style=for-the-badge)](https://litovpro.github.io/gropy)
+[![Telegram](https://img.shields.io/badge/📱_Telegram-Web_App-0088cc?style=for-the-badge)](https://litovpro.github.io/gropy)
+
+**Мягкий планировщик задач для поддержки ментального здоровья**  
+*Превращает повседневные дела в приятный опыт без стресса и чувства вины*
+
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)
+![Mobile First](https://img.shields.io/badge/Mobile-First-FF6B6B?style=flat-square&logo=mobile)
+![Mental Health](https://img.shields.io/badge/Mental-Health-4ECDC4?style=flat-square&logo=heart)
+
+</div>
+
+## 📱 Демо и скриншоты
+
+<div align="center">
+
+### 🎯 **Попробуйте прямо сейчас:** [litovpro.github.io/gropy](https://litovpro.github.io/gropy)
+
+| Главная страница | Магазин | Питомец | Профиль |
+|:---:|:---:|:---:|:---:|
+| 🏠 Дела и предложения | 🏪 Темы и награды | 🐱 Эволюция питомца | 👤 Статистика и настройки |
+
+### 📱 Mobile-First дизайн
+*Идеально работает на телефонах с нижней навигацией*
+
+### 🌈 4 красивые темы
+*Light • Dark • Ocean • Forest*
+
+</div>
+
+---
 
 ## ✨ Особенности
 
@@ -34,20 +69,30 @@
 
 ## 🚀 Быстрый старт
 
-### Установка
-```bash
-npm install
-```
+### 🌐 Онлайн использование
+Просто откройте [litovpro.github.io/gropy](https://litovpro.github.io/gropy) в браузере!
 
-### Запуск в режиме разработки
+### 💻 Локальная разработка
 ```bash
+# Клонирование репозитория
+git clone https://github.com/LitovPro/gropy.git
+cd gropy
+
+# Установка зависимостей
+npm install
+
+# Запуск в режиме разработки
 npm start
 ```
 Откройте [http://localhost:3000](http://localhost:3000) в браузере.
 
-### Сборка для продакшена
+### 📱 Telegram Web App
 ```bash
-npm run build
+# Деплой на GitHub Pages
+npm run deploy
+
+# Получить URL для Telegram бота
+npm run telegram
 ```
 
 ## 🔒 Безопасность и приватность
@@ -112,6 +157,44 @@ MIT License - используйте свободно для личных и к�
 
 ---
 
+## 🤝 Контрибьютинг
+
+Мы приветствуем вклад в развитие Gropy! 
+
+### 🐛 Нашли баг?
+[Создайте Issue](https://github.com/LitovPro/gropy/issues/new) с подробным описанием
+
+### 💡 Есть идея?
+[Обсудите в Discussions](https://github.com/LitovPro/gropy/discussions) или создайте Feature Request
+
+### 🔧 Хотите помочь кодом?
+1. Fork репозитория
+2. Создайте feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit изменения (`git commit -m 'Add amazing feature'`)
+4. Push в branch (`git push origin feature/amazing-feature`)
+5. Создайте Pull Request
+
+## 💖 Благодарности
+
+- **Всем пользователям** за обратную связь и поддержку
+- **Open Source сообществу** за отличные библиотеки
+- **Команде React** за потрясающий фреймворк
+- **Разработчикам Telegram** за Web App API
+
+## 📞 Контакты
+
+- **GitHub:** [@LitovPro](https://github.com/LitovPro)
+- **Демо:** [litovpro.github.io/gropy](https://litovpro.github.io/gropy)
+- **Issues:** [GitHub Issues](https://github.com/LitovPro/gropy/issues)
+
+---
+
+<div align="center">
+
 **Сделано с 💚 для поддержки ментального здоровья и мягкой организации жизни!**
 
 *Gropy - это не про продуктивность любой ценой, а про заботу о себе и создание здоровых привычек без стресса.*
+
+⭐ **Поставьте звёздочку, если Gropy помогает вам!** ⭐
+
+</div>
