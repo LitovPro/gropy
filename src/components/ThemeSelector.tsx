@@ -9,10 +9,10 @@ const ThemeSelectorContainer = styled.div`
   left: 10px;
   z-index: 1000;
   display: flex;
-  gap: 0.4rem;
-  padding: 0.5rem;
-  background: ${({ theme }) => theme.colors.surface}dd;
-  backdrop-filter: blur(10px);
+  gap: 0.3rem;
+  padding: 0.4rem;
+  background: ${({ theme }) => theme.colors.surface}ee;
+  backdrop-filter: blur(15px);
   border-radius: ${({ theme }) => theme.borderRadius.large};
   box-shadow: ${({ theme }) => theme.shadows.medium};
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -22,6 +22,13 @@ const ThemeSelectorContainer = styled.div`
     left: 20px;
     gap: 0.5rem;
     padding: 0.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    top: 8px;
+    left: 8px;
+    gap: 0.25rem;
+    padding: 0.3rem;
   }
 `;
 

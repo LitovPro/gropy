@@ -15,14 +15,14 @@ const StatsContainer = styled.div`
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: ${({ theme }) => theme.colors.surface}dd;
-  backdrop-filter: blur(10px);
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: ${({ theme }) => theme.colors.surface}ee;
+  backdrop-filter: blur(15px);
   border-radius: ${({ theme }) => theme.borderRadius.large};
   box-shadow: ${({ theme }) => theme.shadows.large};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  min-width: 180px;
+  min-width: 160px;
   max-width: calc(100vw - 20px);
   
   @media (min-width: 768px) {
@@ -31,6 +31,14 @@ const StatsContainer = styled.div`
     padding: 1.5rem;
     gap: 1rem;
     min-width: 200px;
+  }
+  
+  @media (max-width: 480px) {
+    top: 8px;
+    right: 8px;
+    padding: 0.6rem;
+    gap: 0.4rem;
+    min-width: 140px;
   }
 `;
 

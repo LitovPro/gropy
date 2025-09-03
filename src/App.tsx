@@ -7,6 +7,8 @@ import Shop from './components/Shop';
 import Pet from './components/Pet';
 import ThemeSelector from './components/ThemeSelector';
 import StatsPanel from './components/StatsPanel';
+import DailySuggestions from './components/DailySuggestions';
+import WellbeingCenter from './components/WellbeingCenter';
 import { ThemeProvider } from './ThemeContext';
 import GlobalStyles from './GlobalStyles';
 import { useTodos } from './hooks/useTodos';
@@ -55,12 +57,16 @@ const shopItems: ShopItem[] = [
 
 const Container = styled.div`
   min-height: 100vh;
-  padding: 1rem;
+  padding: 0.75rem;
   background: ${({ theme }) => theme.colors.background};
   position: relative;
   
   @media (min-width: 768px) {
     padding: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
   }
 `;
 
@@ -95,57 +101,50 @@ const Subtitle = styled.p`
 const MainContent = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0;
 
   @media (min-width: 1024px) {
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 1fr 380px;
     gap: 2rem;
-    padding: 0;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.75rem;
   }
 `;
 
 const TodoSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
+  
+  @media (min-width: 768px) {
+    gap: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 1rem;
+  }
 `;
 
 const SidePanel = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-`;
-
-const DangerZone = styled.div`
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1rem;
-  background: ${({ theme }) => theme.colors.surface}dd;
-  backdrop-filter: blur(10px);
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  border: 1px solid ${({ theme }) => theme.colors.error}33;
-`;
-
-const DangerButton = styled.button`
-  padding: 0.5rem 1rem;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.error};
-  border: 1px solid ${({ theme }) => theme.colors.error}33;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  gap: 1.25rem;
   
-  &:hover {
-    background: ${({ theme }) => theme.colors.error}10;
-    border-color: ${({ theme }) => theme.colors.error};
+  @media (min-width: 768px) {
+    gap: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 1rem;
   }
 `;
+
+// Удалили DangerZone - заменили на WellbeingCenter
 
 const App: React.FC = () => {
   const { 
@@ -199,11 +198,9 @@ const App: React.FC = () => {
   };
 
   // Безопасная очистка (с подтверждением)
-  const handleClearMemory = () => {
-    if (window.confirm('⚠️ Вы уверены? Это удалит ВСЕ данные безвозвратно!')) {
-      resetAllTodos();
-      resetGameState();
-    }
+  const handleResetData = () => {
+    resetAllTodos();
+    resetGameState();
   };
 
   const userStats = {
@@ -233,6 +230,8 @@ const App: React.FC = () => {
 
         <MainContent>
           <TodoSection>
+            <DailySuggestions onAddTask={addTodo} />
+            
             <TodoForm 
               addTodo={addTodo} 
               maxTodos={50}
@@ -270,11 +269,12 @@ const App: React.FC = () => {
           </SidePanel>
         </MainContent>
 
-        <DangerZone>
-          <DangerButton onClick={handleClearMemory}>
-            🗑️ Очистить всё
-          </DangerButton>
-        </DangerZone>
+        <WellbeingCenter 
+          completedToday={stats.completed}
+          totalPoints={gameState.points}
+          streak={gameState.streak}
+          onResetData={handleResetData}
+        />
       </Container>
     </ThemeProvider>
   );
