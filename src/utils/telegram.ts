@@ -1,6 +1,7 @@
 /**
  * Telegram Web App интеграция для Gropy
  */
+import React from 'react';
 
 declare global {
   interface Window {
