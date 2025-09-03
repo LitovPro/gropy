@@ -11,8 +11,16 @@ export interface TaskSuggestion {
   motivationalText?: string;
 }
 
+// Внутренний тип для задач без ID (до генерации)
+interface TaskTemplate {
+  text: string;
+  energy: 'low' | 'medium' | 'high';
+  emoji: string;
+  motivationalText?: string;
+}
+
 // Ежедневные предложения по категориям
-const taskSuggestions = {
+const taskSuggestions: Record<string, TaskTemplate[]> = {
   daily: [
     { text: 'Выпить стакан воды', energy: 'low', emoji: '💧', motivationalText: 'Увлажнение - основа хорошего дня!' },
     { text: 'Сделать кровать', energy: 'low', emoji: '🛏️', motivationalText: 'Маленький порядок = большое спокойствие' },
@@ -96,7 +104,7 @@ export const getDailySuggestions = (date: Date = new Date()): TaskSuggestion[] =
   const dayOfWeek = date.getDay(); // 0 = воскресенье, 6 = суббота
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
   
-  const suggestions: TaskSuggestion[] = [];
+  const suggestions: Omit<TaskSuggestion, 'id'>[] = [];
   
   // Всегда добавляем ежедневные задачи
   const dailyTasks = getRandomTasks(taskSuggestions.daily, 2);
@@ -122,15 +130,15 @@ export const getDailySuggestions = (date: Date = new Date()): TaskSuggestion[] =
     suggestions.push(...healthTasks.map(task => ({ ...task, category: 'health' as const })));
   }
   
-  // Добавляем уникальные ID
-  return suggestions.map((task, index) => ({
+  // Добавляем уникальные ID и возвращаем полные TaskSuggestion объекты
+  return suggestions.map((task, index): TaskSuggestion => ({
     ...task,
     id: `suggestion-${date.toDateString()}-${index}`
   }));
 };
 
 // Функция получения случайных задач из категории
-function getRandomTasks<T>(tasks: T[], count: number): T[] {
+function getRandomTasks(tasks: TaskTemplate[], count: number): TaskTemplate[] {
   const shuffled = [...tasks].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
