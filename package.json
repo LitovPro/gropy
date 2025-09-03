@@ -2,7 +2,7 @@
   "name": "gropy",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://github.com/LitovPro/gropy",
+  "homepage": "https://litovpro.github.io/gropy",
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -30,7 +30,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "telegram": "echo 'Готов для Telegram Web App! Используйте URL: https://litovpro.github.io/gropy'"
   },
   "eslintConfig": {
     "extends": [
@@ -49,5 +50,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }
