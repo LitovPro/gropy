@@ -116,6 +116,8 @@ const GlobalStyles = createGlobalStyle`
     font-weight: 600;
     color: ${({ theme }) => theme.colors.text};
     margin-bottom: 0.75rem;
+    opacity: 0.95;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
 
   h3 {
@@ -187,6 +189,10 @@ const GlobalStyles = createGlobalStyle`
     display: none !important;
   }
   
+  .mobile-only {
+    display: block;
+  }
+  
   @media (min-width: 768px) {
     .mobile-content {
       display: none;
@@ -198,6 +204,10 @@ const GlobalStyles = createGlobalStyle`
     
     .desktop-only {
       display: block !important;
+    }
+    
+    .mobile-only {
+      display: none !important;
     }
   }
 

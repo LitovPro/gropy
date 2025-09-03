@@ -9,12 +9,13 @@ import ThemeSelector from './components/ThemeSelector';
 import StatsPanel from './components/StatsPanel';
 import DailySuggestions from './components/DailySuggestions';
 import WellbeingCenter from './components/WellbeingCenter';
-import MobileNavigation from './components/MobileNavigation';
-import TabNavigation, { TabType } from './components/TabNavigation';
+import BottomNavigation, { NavTab } from './components/BottomNavigation';
+import ProfileSection from './components/ProfileSection';
 import { ThemeProvider } from './ThemeContext';
 import GlobalStyles from './GlobalStyles';
 import { useTodos } from './hooks/useTodos';
 import { useGameState } from './hooks/useGameState';
+import { useDailyExperience } from './hooks/useDailyExperience';
 import { ShopItem } from './types';
 
 // Красивые магазинные предметы
@@ -59,30 +60,34 @@ const shopItems: ShopItem[] = [
 
 const Container = styled.div`
   min-height: 100vh;
-  padding: 0.75rem;
   background: ${({ theme }) => theme.colors.background};
   position: relative;
   
+  /* Мобильная версия */
+  @media (max-width: 767px) {
+    padding: 0.75rem 0.75rem 5rem 0.75rem; /* Отступ снизу для нижней навигации */
+  }
+  
+  /* Десктопная версия */
   @media (min-width: 768px) {
     padding: 2rem;
-  }
-  
-  @media (max-width: 767px) {
-    padding: 4rem 0.75rem 1rem 0.75rem; /* Отступ сверху для навигации */
-  }
-  
-  @media (max-width: 480px) {
-    padding: 4rem 0.5rem 1rem 0.5rem;
   }
 `;
 
 const Header = styled.div`
   text-align: center;
-  margin: 0.5rem 0 1rem 0;
+  margin: 0.5rem 0 1.5rem 0;
   position: relative;
   
   @media (min-width: 768px) {
     margin: 2rem 0 3rem 0;
+  }
+  
+  /* Скрываем на мобильных в разделах кроме home */
+  @media (max-width: 767px) {
+    &.hidden-mobile {
+      display: none;
+    }
   }
 `;
 
@@ -168,7 +173,7 @@ const SidePanel = styled.div`
 // Удалили DangerZone - заменили на WellbeingCenter
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState<TabType>('todos');
+  const [activeTab, setActiveTab] = React.useState<NavTab>('home');
   
   const { 
     todos, 
@@ -190,11 +195,29 @@ const App: React.FC = () => {
     expForNextLevel 
   } = useGameState();
 
-  // Обработчик выполнения задачи
+  const { 
+    celebrateCompletion, 
+    feedbackOnAction, 
+    getWelcomeMessage,
+    markVisitToday 
+  } = useDailyExperience();
+
+  // Отмечаем визит при загрузке
+  React.useEffect(() => {
+    markVisitToday();
+  }, []);
+
+  // Обновляем заголовок страницы
+  React.useEffect(() => {
+    document.title = `Gropy - ${stats.pending} дел осталось`;
+  }, [stats.pending]);
+
+  // Обработчик выполнения задачи с haptic feedback
   const handleToggleTodo = (id: string) => {
     const todo = todos.find(t => t.id === id);
     if (todo && !todo.completed) {
       addPoints(todo.points);
+      celebrateCompletion(); // Haptic feedback для Telegram
       
       // Проверка достижений
       if (stats.completed + 1 === 1) {
@@ -207,14 +230,14 @@ const App: React.FC = () => {
     toggleTodo(id);
   };
 
-  // Покупка предметов
+  // Покупка предметов с feedback
   const handleBuyItem = (item: ShopItem) => {
     if (spendPoints(item.price)) {
+      feedbackOnAction(); // Haptic feedback
+      
       if (item.type === 'theme') {
-        // Тема будет активирована через ThemeSelector
         addAchievement('theme-buyer');
       } else {
-        // Добавить предмет питомцу
         addAchievement('pet-lover');
       }
     }
@@ -237,7 +260,7 @@ const App: React.FC = () => {
 
   const renderMobileContent = () => {
     switch (activeTab) {
-      case 'todos':
+      case 'home':
         return (
           <TodoSection>
             <DailySuggestions onAddTask={addTodo} />
@@ -288,6 +311,16 @@ const App: React.FC = () => {
           </SidePanel>
         );
       
+      case 'profile':
+        return (
+          <ProfileSection
+            stats={userStats}
+            expProgress={expProgress}
+            expForNextLevel={expForNextLevel}
+            onResetData={handleResetData}
+          />
+        );
+      
       default:
         return null;
     }
@@ -297,16 +330,8 @@ const App: React.FC = () => {
     <ThemeProvider>
       <GlobalStyles />
       <Container>
-        {/* Мобильная навигация */}
-        <MobileNavigation 
-          stats={userStats}
-          expProgress={expProgress}
-          expForNextLevel={expForNextLevel}
-          onResetData={handleResetData}
-        />
-        
-        {/* Десктопная навигация (показывается только на больших экранах) */}
-        <div className="desktop-only" style={{ display: 'none' }}>
+        {/* Десктопная навигация (только на больших экранах) */}
+        <div className="desktop-only">
           <ThemeSelector />
           <StatsPanel 
             stats={userStats} 
@@ -315,25 +340,20 @@ const App: React.FC = () => {
           />
         </div>
         
-        <Header className="fade-in">
+        {/* Заголовок - показываем только на главной в мобильной версии */}
+        <Header 
+          className={`fade-in ${activeTab !== 'home' ? 'hidden-mobile' : ''}`}
+        >
           <Title>Gropy</Title>
           <Subtitle>Твой добрый помощник в делах ✨</Subtitle>
         </Header>
 
-        {/* Мобильные табы */}
-        <TabNavigation 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          todosCount={stats.pending}
-          completedCount={stats.completed}
-        />
-
-        {/* Мобильный контент */}
+        {/* Мобильный контент - только один раздел на экране */}
         <div className="mobile-content">
           {renderMobileContent()}
         </div>
 
-        {/* Десктопный контент */}
+        {/* Десктопный контент - классический layout */}
         <MainContent className="desktop-content">
           <TodoSection>
             <DailySuggestions onAddTask={addTodo} />
@@ -382,6 +402,17 @@ const App: React.FC = () => {
             totalPoints={gameState.points}
             streak={gameState.streak}
             onResetData={handleResetData}
+          />
+        </div>
+
+        {/* Нижняя навигация - только на мобильных */}
+        <div className="mobile-only">
+          <BottomNavigation 
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            pendingTasks={stats.pending}
+            userPoints={gameState.points}
+            level={gameState.level}
           />
         </div>
       </Container>
