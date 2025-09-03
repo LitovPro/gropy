@@ -5,22 +5,29 @@ import { useTheme } from '../ThemeContext';
 
 const ThemeSelectorContainer = styled.div`
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: 10px;
+  left: 10px;
   z-index: 1000;
   display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem;
+  gap: 0.4rem;
+  padding: 0.5rem;
   background: ${({ theme }) => theme.colors.surface}dd;
   backdrop-filter: blur(10px);
   border-radius: ${({ theme }) => theme.borderRadius.large};
   box-shadow: ${({ theme }) => theme.shadows.medium};
   border: 1px solid ${({ theme }) => theme.colors.border};
+  
+  @media (min-width: 768px) {
+    top: 20px;
+    left: 20px;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
 `;
 
 const ThemeButton = styled.button<{ isActive: boolean; themeColor: string }>`
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 2px solid ${props => props.isActive ? props.theme.colors.primary : 'transparent'};
   background: ${props => props.themeColor};
@@ -45,11 +52,22 @@ const ThemeButton = styled.button<{ isActive: boolean; themeColor: string }>`
       left: 50%;
       transform: translate(-50%, -50%);
       color: white;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }
   `}
+  
+  @media (min-width: 768px) {
+    width: 32px;
+    height: 32px;
+    
+    ${props => props.isActive && `
+      &::after {
+        font-size: 16px;
+      }
+    `}
+  }
 `;
 
 const themeColors = {

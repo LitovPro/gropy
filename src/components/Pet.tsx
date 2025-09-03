@@ -154,13 +154,13 @@ const Pet: React.FC<PetProps> = ({ level }) => {
 
   const getMoodEmoji = (mood: string): string => {
     const moods: { [key: string]: string } = {
-      happy: '😊 Счастлив',
-      excited: '🤩 Взволнован', 
-      sleepy: '😴 Сонный',
-      hungry: '😋 Голодный',
+      happy: '😊 Довольный',
+      excited: '🤩 Воодушевлён', 
+      sleepy: '😴 Отдыхает',
+      hungry: '😋 Хочет вкусненького',
       playful: '😸 Игривый'
     };
-    return moods[mood] || '😊 Счастлив';
+    return moods[mood] || '😊 Довольный';
   };
 
   // Смена настроения каждые 30 секунд
@@ -237,7 +237,7 @@ const Pet: React.FC<PetProps> = ({ level }) => {
       </PetStats>
       
       <InteractionButton onClick={handleInteraction}>
-        🤗 Погладить питомца
+        💖 Погладить питомца
       </InteractionButton>
     </PetContainer>
   );

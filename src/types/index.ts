@@ -7,11 +7,11 @@ export interface Todo {
   text: string;
   completed: boolean;
   points: number;
-  category: 'daily' | 'work' | 'personal' | 'health' | 'learning';
-  priority: 'low' | 'medium' | 'high';
+  category: 'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare';
+  energy: 'low' | 'medium' | 'high'; // Вместо приоритета - уровень энергии
   createdAt: string;
   completedAt?: string;
-  dueDate?: string;
+  mood?: 'great' | 'good' | 'okay' | 'tired'; // Настроение при выполнении
 }
 
 export interface ShopItem {

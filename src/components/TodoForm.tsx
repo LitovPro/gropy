@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 interface TodoFormProps {
-  addTodo: (text: string, category?: 'daily' | 'work' | 'personal' | 'health' | 'learning', priority?: 'low' | 'medium' | 'high') => void;
+  addTodo: (text: string, category?: 'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare', energy?: 'low' | 'medium' | 'high') => void;
   maxTodos: number;
   currentCount: number;
 }
 
 const FormContainer = styled.div`
   background: ${({ theme }) => theme.colors.surface};
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: ${({ theme }) => theme.borderRadius.large};
   box-shadow: ${({ theme }) => theme.shadows.medium};
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -17,6 +17,12 @@ const FormContainer = styled.div`
   
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.large};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin: 0 0.5rem;
+    border-radius: ${({ theme }) => theme.borderRadius.medium};
   }
 `;
 
@@ -32,10 +38,10 @@ const InputContainer = styled.div`
 
 const Input = styled.input`
   width: 100%;
-  padding: 1rem 1.25rem;
+  padding: 1.25rem;
   border: 2px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.borderRadius.medium};
-  font-size: 1rem;
+  font-size: 1.1rem;
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.text};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -48,16 +54,23 @@ const Input = styled.input`
   &::placeholder {
     color: ${({ theme }) => theme.colors.textSecondary};
   }
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: ${({ theme }) => theme.borderRadius.small};
+  }
 `;
 
 const ControlsRow = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
   
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
   }
 `;
 
@@ -123,8 +136,8 @@ const ErrorMessage = styled.div`
 
 const TodoForm: React.FC<TodoFormProps> = ({ addTodo, maxTodos, currentCount }) => {
   const [text, setText] = useState<string>('');
-  const [category, setCategory] = useState<'daily' | 'work' | 'personal' | 'health' | 'learning'>('personal');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [category, setCategory] = useState<'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare'>('personal');
+  const [energy, setEnergy] = useState<'low' | 'medium' | 'high'>('low');
   const [error, setError] = useState<string>('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -142,12 +155,12 @@ const TodoForm: React.FC<TodoFormProps> = ({ addTodo, maxTodos, currentCount }) 
     }
 
     try {
-      addTodo(text.trim(), category, priority);
+      addTodo(text.trim(), category, energy);
       setText('');
       setCategory('personal');
-      setPriority('medium');
+      setEnergy('low');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка при добавлении задачи');
+      setError(err instanceof Error ? err.message : 'Не получилось добавить задачу');
     }
   };
 
@@ -155,14 +168,14 @@ const TodoForm: React.FC<TodoFormProps> = ({ addTodo, maxTodos, currentCount }) 
 
   return (
     <FormContainer className="fade-in">
-      <h2>➕ Добавить задачу</h2>
+      <h2>✨ Что хочешь сделать?</h2>
       <Form onSubmit={handleSubmit}>
         <InputContainer>
           <Input
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Что нужно сделать?"
+            placeholder="Например: выпить стакан воды ☺️"
             disabled={isAtLimit}
             maxLength={200}
           />
@@ -171,35 +184,36 @@ const TodoForm: React.FC<TodoFormProps> = ({ addTodo, maxTodos, currentCount }) 
         <ControlsRow>
           <Select 
             value={category} 
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => setCategory(e.target.value as 'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare')}
             disabled={isAtLimit}
           >
-            <option value="daily">🌅 Ежедневные</option>
-            <option value="work">💼 Работа</option>
+            <option value="daily">🌅 Каждый день</option>
+            <option value="selfcare">🌸 Забота о себе</option>
             <option value="personal">🏠 Личное</option>
-            <option value="health">💪 Здоровье</option>
-            <option value="learning">📚 Обучение</option>
+            <option value="health">💚 Здоровье</option>
+            <option value="work">💼 Работа</option>
+            <option value="learning">📚 Изучение</option>
           </Select>
           
           <Select 
-            value={priority} 
-            onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
+            value={energy} 
+            onChange={(e) => setEnergy(e.target.value as 'low' | 'medium' | 'high')}
             disabled={isAtLimit}
           >
-            <option value="low">🟢 Низкий (1 очко)</option>
-            <option value="medium">🟡 Средний (2 очка)</option>
-            <option value="high">🔴 Высокий (3 очка)</option>
+            <option value="low">🟢 Легко (1 очко)</option>
+            <option value="medium">🟡 Средне (2 очка)</option>
+            <option value="high">🟠 Энергично (3 очка)</option>
           </Select>
           
           <SubmitButton type="submit" disabled={isAtLimit || !text.trim()}>
-            Добавить
+            Добавить ✨
           </SubmitButton>
         </ControlsRow>
         
         {error && <ErrorMessage>{error}</ErrorMessage>}
         
         <Counter>
-          {currentCount} / {maxTodos} задач
+          {currentCount} из {maxTodos} дел
         </Counter>
       </Form>
     </FormContainer>

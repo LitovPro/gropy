@@ -10,19 +10,28 @@ interface StatsPanelProps {
 
 const StatsContainer = styled.div`
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 10px;
+  right: 10px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
+  gap: 0.75rem;
+  padding: 1rem;
   background: ${({ theme }) => theme.colors.surface}dd;
   backdrop-filter: blur(10px);
   border-radius: ${({ theme }) => theme.borderRadius.large};
   box-shadow: ${({ theme }) => theme.shadows.large};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  min-width: 200px;
+  min-width: 180px;
+  max-width: calc(100vw - 20px);
+  
+  @media (min-width: 768px) {
+    top: 20px;
+    right: 20px;
+    padding: 1.5rem;
+    gap: 1rem;
+    min-width: 200px;
+  }
 `;
 
 const StatItem = styled.div`

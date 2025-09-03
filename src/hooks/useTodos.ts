@@ -6,10 +6,10 @@ const STORAGE_KEY = 'gropy-todos';
 const MAX_TODOS = 50; // Увеличили лимит
 
 const initialTodos: Todo[] = [
-  { id: generateSecureId(), text: '🛏️ Заправить кровать', completed: false, points: 1, category: 'daily', priority: 'medium', createdAt: new Date().toISOString() },
-  { id: generateSecureId(), text: '🦷 Почистить зубы', completed: false, points: 1, category: 'daily', priority: 'high', createdAt: new Date().toISOString() },
-  { id: generateSecureId(), text: '🚿 Принять душ', completed: false, points: 1, category: 'daily', priority: 'medium', createdAt: new Date().toISOString() },
-  { id: generateSecureId(), text: '🌞 Прожить день с улыбкой', completed: false, points: 5, category: 'personal', priority: 'high', createdAt: new Date().toISOString() },
+  { id: generateSecureId(), text: '🛏️ Заправить кровать', completed: false, points: 1, category: 'daily', energy: 'low', createdAt: new Date().toISOString() },
+  { id: generateSecureId(), text: '🦷 Почистить зубы', completed: false, points: 1, category: 'daily', energy: 'low', createdAt: new Date().toISOString() },
+  { id: generateSecureId(), text: '🌸 Сделать что-то приятное для себя', completed: false, points: 3, category: 'selfcare', energy: 'medium', createdAt: new Date().toISOString() },
+  { id: generateSecureId(), text: '😊 Найти одну хорошую вещь в дне', completed: false, points: 2, category: 'personal', energy: 'low', createdAt: new Date().toISOString() },
 ];
 
 export const useTodos = () => {
@@ -23,7 +23,7 @@ export const useTodos = () => {
     safeLocalStorage.set(STORAGE_KEY, todos);
   }, [todos]);
 
-  const addTodo = useCallback((text: string, category: 'daily' | 'work' | 'personal' | 'health' | 'learning' = 'personal', priority: 'low' | 'medium' | 'high' = 'medium') => {
+  const addTodo = useCallback((text: string, category: 'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare' = 'personal', energy: 'low' | 'medium' | 'high' = 'medium') => {
     if (todos.length >= MAX_TODOS) {
       throw new Error(`Максимум ${MAX_TODOS} задач`);
     }
@@ -34,16 +34,16 @@ export const useTodos = () => {
     }
 
     const sanitizedText = sanitizeText(text);
-    const emojiSet = ['🎯', '⭐', '🚀', '💎', '🔥', '⚡', '🌟', '🎪', '🎨', '🎵'];
-    const randomEmoji = emojiSet[Math.floor(Math.random() * emojiSet.length)];
+    const positiveEmojis = ['🌟', '✨', '🌸', '🦋', '🌈', '💫', '🌺', '🍀', '🌻', '💖'];
+    const randomEmoji = positiveEmojis[Math.floor(Math.random() * positiveEmojis.length)];
     
     const newTodo: Todo = {
       id: generateSecureId(),
       text: `${randomEmoji} ${sanitizedText}`,
       completed: false,
-      points: priority === 'high' ? 3 : priority === 'medium' ? 2 : 1,
+      points: energy === 'high' ? 3 : energy === 'medium' ? 2 : 1,
       category,
-      priority,
+      energy,
       createdAt: new Date().toISOString(),
     };
 

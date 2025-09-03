@@ -36,37 +36,47 @@ const slideIn = keyframes`
   }
 `;
 
-const ListItem = styled.li<{ completed: boolean; priority: 'low' | 'medium' | 'high' }>`
+const ListItem = styled.li<{ completed: boolean; energy: 'low' | 'medium' | 'high' }>`
   display: flex;
   align-items: center;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   position: relative;
   background: ${({ theme, completed }) => 
-    completed ? theme.colors.border + '20' : 'transparent'
+    completed ? theme.colors.success + '10' : 'transparent'
   };
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: ${slideIn} 0.3s ease-out;
   
   &:hover {
     background: ${({ theme }) => theme.colors.primary}08;
-    transform: translateX(4px);
+    transform: translateX(2px);
   }
   
   &:last-child {
     border-bottom: none;
   }
   
-  ${({ priority, theme }) => {
+  ${({ energy, theme }) => {
     const colors = {
       low: theme.colors.success,
       medium: theme.colors.warning, 
-      high: theme.colors.error
+      high: theme.colors.secondary
     };
     return `
-      border-left: 4px solid ${colors[priority]};
+      border-left: 4px solid ${colors[energy]};
     `;
   }}
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    border-left-width: 3px;
+    
+    &:hover {
+      transform: none;
+      background: ${({ theme }) => theme.colors.primary}05;
+    }
+  }
 `;
 
 const CheckboxContainer = styled.div`
@@ -130,6 +140,11 @@ const TodoMeta = styled.div`
   gap: 0.75rem;
   font-size: 0.75rem;
   color: ${({ theme }) => theme.colors.textSecondary};
+  
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
 `;
 
 const CategoryBadge = styled.span<{ category: string }>`
@@ -140,19 +155,24 @@ const CategoryBadge = styled.span<{ category: string }>`
   font-weight: 500;
 `;
 
-const PriorityBadge = styled.span<{ priority: 'low' | 'medium' | 'high' }>`
+const EnergyBadge = styled.span<{ energy: 'low' | 'medium' | 'high' }>`
   padding: 0.125rem 0.5rem;
   border-radius: ${({ theme }) => theme.borderRadius.small};
   font-weight: 500;
   
-  ${({ priority, theme }) => {
+  ${({ energy, theme }) => {
     const styles = {
       low: `background: ${theme.colors.success}15; color: ${theme.colors.success};`,
       medium: `background: ${theme.colors.warning}15; color: ${theme.colors.warning};`,
-      high: `background: ${theme.colors.error}15; color: ${theme.colors.error};`
+      high: `background: ${theme.colors.secondary}15; color: ${theme.colors.secondary};`
     };
-    return styles[priority];
+    return styles[energy];
   }}
+  
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+  }
 `;
 
 const ActionsContainer = styled.div`
@@ -193,9 +213,14 @@ const ActionButton = styled.button`
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem 2rem;
+  padding: 2rem 1rem;
   color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 1.1rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+    font-size: 1rem;
+  }
 `;
 
 const ClearButton = styled.button`
@@ -234,11 +259,19 @@ const TodoList: React.FC<TodoListProps> = ({
   };
 
   if (todos.length === 0) {
+    const completedSection = showClearCompleted;
     return (
       <ListContainer>
         <EmptyState>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
-          <div>Нет задач в этой категории</div>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+            {completedSection ? '🌟' : '🌸'}
+          </div>
+          <div>
+            {completedSection 
+              ? 'Отлично! Все дела выполнены ✨' 
+              : 'Пока здесь пусто. Добавь первое дело! 😊'
+            }
+          </div>
         </EmptyState>
       </ListContainer>
     );
@@ -251,7 +284,7 @@ const TodoList: React.FC<TodoListProps> = ({
           <ListItem 
             key={todo.id} 
             completed={todo.completed}
-            priority={todo.priority}
+            energy={todo.energy}
             style={{ 
               opacity: deletingId === todo.id ? 0 : 1,
               transform: deletingId === todo.id ? 'translateX(-100%)' : 'translateX(0)'
@@ -271,16 +304,16 @@ const TodoList: React.FC<TodoListProps> = ({
               </TodoText>
               <TodoMeta>
                 <CategoryBadge category={todo.category}>
-                  {todo.category}
+                  {todo.category === 'selfcare' ? 'забота о себе' : 
+                   todo.category === 'daily' ? 'каждый день' :
+                   todo.category === 'health' ? 'здоровье' :
+                   todo.category === 'learning' ? 'изучение' :
+                   todo.category}
                 </CategoryBadge>
-                <PriorityBadge priority={todo.priority}>
-                  {todo.priority}
-                </PriorityBadge>
-                {todo.createdAt && (
-                  <span>
-                    {new Date(todo.createdAt).toLocaleDateString('ru-RU')}
-                  </span>
-                )}
+                <EnergyBadge energy={todo.energy}>
+                  {todo.energy === 'low' ? 'легко' : 
+                   todo.energy === 'medium' ? 'средне' : 'энергично'}
+                </EnergyBadge>
               </TodoMeta>
             </TodoContent>
             

@@ -55,19 +55,23 @@ const shopItems: ShopItem[] = [
 
 const Container = styled.div`
   min-height: 100vh;
-  padding: 2rem;
+  padding: 1rem;
   background: ${({ theme }) => theme.colors.background};
   position: relative;
   
-  @media (max-width: 768px) {
-    padding: 1rem;
+  @media (min-width: 768px) {
+    padding: 2rem;
   }
 `;
 
 const Header = styled.div`
   text-align: center;
-  margin: 2rem 0 3rem 0;
+  margin: 1rem 0 2rem 0;
   position: relative;
+  
+  @media (min-width: 768px) {
+    margin: 2rem 0 3rem 0;
+  }
 `;
 
 const Title = styled.h1`
@@ -90,14 +94,16 @@ const Subtitle = styled.p`
 
 const MainContent = styled.div`
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 2rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 1rem;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-    max-width: 800px;
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+    padding: 0;
   }
 `;
 
@@ -222,7 +228,7 @@ const App: React.FC = () => {
         
         <Header className="fade-in">
           <Title>Gropy</Title>
-          <Subtitle>Геймифицированный планировщик задач</Subtitle>
+          <Subtitle>Твой добрый помощник в делах ✨</Subtitle>
         </Header>
 
         <MainContent>
@@ -234,7 +240,7 @@ const App: React.FC = () => {
             />
             
             <div>
-              <h2>🎯 Активные задачи ({stats.pending})</h2>
+              <h2>🌸 Что хочешь сделать? ({stats.pending})</h2>
               <TodoList 
                 todos={todos.filter(todo => !todo.completed)} 
                 onToggle={handleToggleTodo}
@@ -243,7 +249,7 @@ const App: React.FC = () => {
             </div>
             
             <div>
-              <h2>✅ Выполненные ({stats.completed})</h2>
+              <h2>✨ Уже сделано! ({stats.completed})</h2>
               <TodoList 
                 todos={todos.filter(todo => todo.completed)} 
                 onToggle={handleToggleTodo}
