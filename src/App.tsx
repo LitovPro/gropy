@@ -9,6 +9,8 @@ import ThemeSelector from './components/ThemeSelector';
 import StatsPanel from './components/StatsPanel';
 import DailySuggestions from './components/DailySuggestions';
 import WellbeingCenter from './components/WellbeingCenter';
+import MobileNavigation from './components/MobileNavigation';
+import TabNavigation, { TabType } from './components/TabNavigation';
 import { ThemeProvider } from './ThemeContext';
 import GlobalStyles from './GlobalStyles';
 import { useTodos } from './hooks/useTodos';
@@ -65,14 +67,18 @@ const Container = styled.div`
     padding: 2rem;
   }
   
+  @media (max-width: 767px) {
+    padding: 4rem 0.75rem 1rem 0.75rem; /* Отступ сверху для навигации */
+  }
+  
   @media (max-width: 480px) {
-    padding: 0.5rem;
+    padding: 4rem 0.5rem 1rem 0.5rem;
   }
 `;
 
 const Header = styled.div`
   text-align: center;
-  margin: 1rem 0 2rem 0;
+  margin: 0.5rem 0 1rem 0;
   position: relative;
   
   @media (min-width: 768px) {
@@ -81,21 +87,36 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: clamp(1.8rem, 5vw, 4rem);
   font-weight: 800;
   background: ${({ theme }) => theme.gradients.primary};
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 4px 8px rgba(0,0,0,0.1);
   letter-spacing: -0.02em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  
+  /* Fallback для плохой поддержки background-clip */
+  @supports not (-webkit-background-clip: text) {
+    background: none;
+    color: ${({ theme }) => theme.colors.primary};
+  }
+  
+  @media (max-width: 767px) {
+    font-size: 1.8rem;
+    margin-bottom: 0.125rem;
+  }
 `;
 
 const Subtitle = styled.p`
-  font-size: 1.2rem;
+  font-size: clamp(0.9rem, 3vw, 1.2rem);
   color: ${({ theme }) => theme.colors.textSecondary};
-  font-weight: 400;
+  font-weight: 500;
+  margin: 0;
+  
+  @media (max-width: 767px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const MainContent = styled.div`
@@ -147,6 +168,8 @@ const SidePanel = styled.div`
 // Удалили DangerZone - заменили на WellbeingCenter
 
 const App: React.FC = () => {
+  const [activeTab, setActiveTab] = React.useState<TabType>('todos');
+  
   const { 
     todos, 
     addTodo, 
@@ -212,23 +235,106 @@ const App: React.FC = () => {
     experience: gameState.experience,
   };
 
+  const renderMobileContent = () => {
+    switch (activeTab) {
+      case 'todos':
+        return (
+          <TodoSection>
+            <DailySuggestions onAddTask={addTodo} />
+            
+            <TodoForm 
+              addTodo={addTodo} 
+              maxTodos={50}
+              currentCount={stats.total}
+            />
+            
+            <div>
+              <h2>🌸 Что хочешь сделать? ({stats.pending})</h2>
+              <TodoList 
+                todos={todos.filter(todo => !todo.completed)} 
+                onToggle={handleToggleTodo}
+                onDelete={deleteTodo}
+              />
+            </div>
+            
+            <div>
+              <h2>✨ Уже сделано! ({stats.completed})</h2>
+              <TodoList 
+                todos={todos.filter(todo => todo.completed)} 
+                onToggle={handleToggleTodo}
+                onDelete={deleteTodo}
+                showClearCompleted={stats.completed > 0}
+                onClearCompleted={clearCompleted}
+              />
+            </div>
+          </TodoSection>
+        );
+      
+      case 'shop':
+        return (
+          <SidePanel>
+            <Shop 
+              items={shopItems} 
+              onBuyItem={handleBuyItem}
+              userPoints={gameState.points}
+            />
+          </SidePanel>
+        );
+      
+      case 'pet':
+        return (
+          <SidePanel>
+            <Pet level={gameState.level} />
+          </SidePanel>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
   return (
     <ThemeProvider>
       <GlobalStyles />
       <Container>
-        <ThemeSelector />
-        <StatsPanel 
-          stats={userStats} 
-          expProgress={expProgress} 
-          expForNextLevel={expForNextLevel} 
+        {/* Мобильная навигация */}
+        <MobileNavigation 
+          stats={userStats}
+          expProgress={expProgress}
+          expForNextLevel={expForNextLevel}
+          onResetData={handleResetData}
         />
+        
+        {/* Десктопная навигация (показывается только на больших экранах) */}
+        <div className="desktop-only" style={{ display: 'none' }}>
+          <ThemeSelector />
+          <StatsPanel 
+            stats={userStats} 
+            expProgress={expProgress} 
+            expForNextLevel={expForNextLevel} 
+          />
+        </div>
         
         <Header className="fade-in">
           <Title>Gropy</Title>
           <Subtitle>Твой добрый помощник в делах ✨</Subtitle>
         </Header>
 
-        <MainContent>
+        {/* Мобильные табы */}
+        <TabNavigation 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          todosCount={stats.pending}
+          completedCount={stats.completed}
+        />
+
+        {/* Мобильный контент */}
+        <div className="mobile-content">
+          {renderMobileContent()}
+        </div>
+
+        {/* Десктопный контент */}
+        <MainContent className="desktop-content">
           <TodoSection>
             <DailySuggestions onAddTask={addTodo} />
             
@@ -269,12 +375,15 @@ const App: React.FC = () => {
           </SidePanel>
         </MainContent>
 
-        <WellbeingCenter 
-          completedToday={stats.completed}
-          totalPoints={gameState.points}
-          streak={gameState.streak}
-          onResetData={handleResetData}
-        />
+        {/* WellbeingCenter только на десктопе */}
+        <div className="desktop-only">
+          <WellbeingCenter 
+            completedToday={stats.completed}
+            totalPoints={gameState.points}
+            streak={gameState.streak}
+            onResetData={handleResetData}
+          />
+        </div>
       </Container>
     </ThemeProvider>
   );

@@ -9,7 +9,7 @@ interface TodoFormProps {
 
 const FormContainer = styled.div`
   background: ${({ theme }) => theme.colors.surface};
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: ${({ theme }) => theme.borderRadius.large};
   box-shadow: ${({ theme }) => theme.shadows.medium};
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -19,10 +19,13 @@ const FormContainer = styled.div`
     box-shadow: ${({ theme }) => theme.shadows.large};
   }
   
-  @media (max-width: 768px) {
-    padding: 1rem;
-    margin: 0 0.5rem;
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
+  
+  @media (max-width: 767px) {
     border-radius: ${({ theme }) => theme.borderRadius.medium};
+    box-shadow: ${({ theme }) => theme.shadows.small};
   }
 `;
 
@@ -168,7 +171,9 @@ const TodoForm: React.FC<TodoFormProps> = ({ addTodo, maxTodos, currentCount }) 
 
   return (
     <FormContainer className="fade-in">
-      <h2>✨ Что хочешь сделать?</h2>
+      <h2 style={{ fontSize: 'clamp(1.1rem, 4vw, 1.4rem)', margin: '0 0 1rem 0' }}>
+        ✨ Что хочешь сделать?
+      </h2>
       <Form onSubmit={handleSubmit}>
         <InputContainer>
           <Input

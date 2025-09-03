@@ -173,6 +173,45 @@ const GlobalStyles = createGlobalStyle`
     background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     transform: translateY(-1px);
   }
+
+  /* Responsive visibility */
+  .mobile-content {
+    display: block;
+  }
+  
+  .desktop-content {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: none !important;
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-content {
+      display: none;
+    }
+    
+    .desktop-content {
+      display: grid;
+    }
+    
+    .desktop-only {
+      display: block !important;
+    }
+  }
+
+  /* Улучшенная читаемость текста */
+  h1, h2, h3, h4, h5, h6 {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  /* Темная тема - белый текст с тенью */
+  @media (prefers-color-scheme: dark) {
+    h1, h2, h3, h4, h5, h6 {
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+  }
 `;
 
 export default GlobalStyles;

@@ -14,19 +14,20 @@ const SuggestionsContainer = styled.div`
   overflow: hidden;
   margin-bottom: 1rem;
   
-  @media (max-width: 480px) {
+  @media (max-width: 767px) {
     margin-bottom: 0.75rem;
+    border-radius: ${({ theme }) => theme.borderRadius.medium};
   }
 `;
 
 const SuggestionsHeader = styled.div`
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   background: ${({ theme }) => theme.gradients.secondary};
   color: white;
   text-align: center;
   
-  @media (max-width: 480px) {
-    padding: 1rem;
+  @media (max-width: 767px) {
+    padding: 0.75rem 1rem;
   }
 `;
 
@@ -38,24 +39,27 @@ const MotivationalText = styled.p`
 `;
 
 const SuggestionsList = styled.div`
-  padding: 1rem;
+  padding: 0.75rem;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
   
-  @media (max-width: 480px) {
-    padding: 0.75rem;
-    gap: 0.5rem;
+  @media (min-width: 768px) {
+    padding: 1rem;
+    gap: 0.75rem;
+    max-height: none;
   }
 `;
 
 const SuggestionCard = styled.div<{ energy: 'low' | 'medium' | 'high' }>`
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: ${({ theme }) => theme.gradients.card};
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: ${({ theme }) => theme.colors.background};
   border-radius: ${({ theme }) => theme.borderRadius.medium};
-  border-left: 4px solid ${({ energy, theme }) => {
+  border-left: 3px solid ${({ energy, theme }) => {
     const colors = {
       low: theme.colors.success,
       medium: theme.colors.warning,
@@ -65,20 +69,28 @@ const SuggestionCard = styled.div<{ energy: 'low' | 'medium' | 'high' }>`
   }};
   transition: all 0.3s ease;
   cursor: pointer;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadows.medium};
+    background: ${({ theme }) => theme.colors.primary}08;
+    border-color: ${({ theme }) => theme.colors.primary}40;
   }
   
   &:active {
-    transform: translateY(0);
+    transform: scale(0.98);
   }
   
-  @media (max-width: 480px) {
-    padding: 0.75rem;
-    gap: 0.75rem;
-    border-left-width: 3px;
+  @media (min-width: 768px) {
+    padding: 1rem;
+    gap: 1rem;
+    border-left-width: 4px;
+    background: ${({ theme }) => theme.gradients.card};
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: ${({ theme }) => theme.shadows.medium};
+      background: ${({ theme }) => theme.gradients.card};
+    }
   }
 `;
 

@@ -10,7 +10,7 @@ const PetContainer = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.large};
   box-shadow: ${({ theme }) => theme.shadows.medium};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -23,6 +23,16 @@ const PetContainer = styled.div`
     right: 0;
     height: 4px;
     background: ${({ theme }) => theme.gradients.primary};
+  }
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+  
+  @media (max-width: 767px) {
+    padding: 1rem;
+    border-radius: ${({ theme }) => theme.borderRadius.medium};
+    box-shadow: ${({ theme }) => theme.shadows.small};
   }
 `;
 

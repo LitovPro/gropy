@@ -17,6 +17,11 @@ const ListContainer = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
   overflow: hidden;
   transition: all 0.3s ease;
+  
+  @media (max-width: 767px) {
+    border-radius: ${({ theme }) => theme.borderRadius.medium};
+    box-shadow: ${({ theme }) => theme.shadows.small};
+  }
 `;
 
 const List = styled.ul`
