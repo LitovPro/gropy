@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import { ShopItem } from '../types';
 import { useTheme } from '../ThemeContext';
 
@@ -46,7 +46,7 @@ const rarityColors = {
   legendary: '#f59e0b'
 };
 
-const ItemCard = styled.div<{ rarity: string; canAfford: boolean }>`
+const ItemCard = styled.div<{ rarity: string; canAfford: boolean; isPurchasing: boolean }>`
   display: flex;
   flex-direction: column;
   padding: 1.25rem;
@@ -56,6 +56,10 @@ const ItemCard = styled.div<{ rarity: string; canAfford: boolean }>`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   opacity: ${({ canAfford }) => canAfford ? 1 : 0.6};
+  
+  ${({ isPurchasing }) => isPurchasing && css`
+    animation: ${purchaseAnimation} 0.3s ease;
+  `}
   
   &:hover {
     transform: translateY(-4px);
@@ -231,9 +235,7 @@ const Shop: React.FC<ShopProps> = ({ items, onBuyItem, userPoints }) => {
                 key={item.id} 
                 rarity={item.rarity}
                 canAfford={canAfford}
-                style={{ 
-                  animation: isPurchasing ? `${purchaseAnimation} 0.3s ease` : 'none'
-                }}
+                isPurchasing={isPurchasing}
               >
                 <ItemHeader>
                   <ItemEmoji>{item.emoji}</ItemEmoji>
