@@ -1,61 +1,71 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { themes, ThemeName, Theme } from './styles/themes';
-import { safeLocalStorage } from './utils/security';
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { ThemeProvider as StyledThemeProvider } from 'styled-components'
+import { lightTheme, darkTheme, oceanTheme, forestTheme, Theme } from './styles/themes'
+
+type ThemeName = 'light' | 'dark' | 'ocean' | 'forest'
 
 interface ThemeContextType {
-  currentTheme: Theme;
-  themeName: ThemeName;
-  setTheme: (themeName: ThemeName) => void;
-  availableThemes: ThemeName[];
+  theme: Theme
+  themeName: ThemeName
+  setTheme: (name: ThemeName) => void
 }
 
-const ThemeContext = createContext<ThemeContextType>({
-  currentTheme: themes.light,
-  themeName: 'light',
-  setTheme: () => {},
-  availableThemes: Object.keys(themes) as ThemeName[],
-});
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-const STORAGE_KEY = 'gropy-theme';
+const themes = {
+  light: lightTheme,
+  dark: darkTheme,
+  ocean: oceanTheme,
+  forest: forestTheme,
+}
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [themeName, setThemeName] = useState<ThemeName>(() => {
-    const saved = safeLocalStorage.get(STORAGE_KEY);
-    return (saved && saved in themes) ? saved : 'light';
-  });
+    // Initialize with light theme by default
+    return 'light'
+  })
 
-  // Автосохранение темы
-  useEffect(() => {
-    safeLocalStorage.set(STORAGE_KEY, themeName);
-  }, [themeName]);
+  const theme = themes[themeName]
 
-  const setTheme = (newThemeName: ThemeName) => {
-    if (newThemeName in themes) {
-      setThemeName(newThemeName);
+  const setTheme = (name: ThemeName) => {
+    setThemeName(name)
+    try {
+      localStorage.setItem('gropy-theme', name)
+    } catch {
+      // Ignore localStorage errors
     }
-  };
+  }
 
-  const contextValue: ThemeContextType = {
-    currentTheme: themes[themeName],
-    themeName,
-    setTheme,
-    availableThemes: Object.keys(themes) as ThemeName[],
-  };
+  useEffect(() => {
+    // Load theme from localStorage after component mounts
+    try {
+      const saved = localStorage.getItem('gropy-theme')
+      if (saved && themes[saved as ThemeName]) {
+        setThemeName(saved as ThemeName)
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, [])
+
+  useEffect(() => {
+    // Apply theme to document for CSS custom properties
+    document.documentElement.setAttribute('data-theme', themeName)
+  }, [themeName])
 
   return (
-    <ThemeContext.Provider value={contextValue}>
-      <StyledThemeProvider theme={themes[themeName]}>
-        {children}
-      </StyledThemeProvider>
+    <ThemeContext.Provider value={{ theme, themeName, setTheme }}>
+      <StyledThemeProvider theme={theme}>{children}</StyledThemeProvider>
     </ThemeContext.Provider>
-  );
-};
+  )
+}
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
+  const context = useContext(ThemeContext)
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider')
   }
-  return context;
-};
+  return context
+}

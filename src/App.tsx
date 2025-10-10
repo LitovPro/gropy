@@ -1,423 +1,384 @@
-import React from 'react';
-import styled from 'styled-components';
-import './App.css';
-import TodoList from './components/TodoList';
-import TodoForm from './components/TodoForm';
-import Shop from './components/Shop';
-import Pet from './components/Pet';
-import ThemeSelector from './components/ThemeSelector';
-import StatsPanel from './components/StatsPanel';
-import DailySuggestions from './components/DailySuggestions';
-import WellbeingCenter from './components/WellbeingCenter';
-import BottomNavigation, { NavTab } from './components/BottomNavigation';
-import ProfileSection from './components/ProfileSection';
-import { ThemeProvider } from './ThemeContext';
-import GlobalStyles from './GlobalStyles';
-import { useTodos } from './hooks/useTodos';
-import { useGameState } from './hooks/useGameState';
-import { useDailyExperience } from './hooks/useDailyExperience';
-import { ShopItem } from './types';
+import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react'
+import styled from 'styled-components'
+// import { Suggestion } from './types'
+import { useTodos } from './hooks/useTodos'
+import { useGameState } from './hooks/useGameState'
+import { useDailyExperience } from './hooks/useDailyExperience'
+import { useRituals } from './hooks/useRituals'
+import { useJournal } from './hooks/useJournal'
+import { useUiPrefs } from './hooks/useUiPrefs'
+import { useToast } from './components/Toast/useToast'
+// import { getAdaptedDailySuggestions } from './utils/suggestionsAdapter'
+// import { rankSuggestions } from './utils/suggestionRanking'
+import { safeGet, safeSet } from './utils/ls'
+import { Toast } from './components/Toast/Toast'
+import { EdgePeek } from './components/UX/EdgePeek'
+// import { SuggestionsPager } from './components/SuggestionsPager/SuggestionsPager'
+// Lazy load heavy components
+const RitualsPager = lazy(() => import('./components/RitualsPager').then(m => ({ default: m.RitualsPager })))
+const EmotionalDiary = lazy(() => import('./components/EmotionalDiary').then(m => ({ default: m.EmotionalDiary })))
+const Shop = lazy(() => import('./components/Shop').then(m => ({ default: m.Shop })))
+const ProfileSection = lazy(() => import('./components/ProfileSection').then(m => ({ default: m.ProfileSection })))
+const SoundSettings = lazy(() => import('./components/SoundSettings').then(m => ({ default: m.SoundSettings })))
+const SupportCard = lazy(() => import('./components/SupportCard').then(m => ({ default: m.SupportCard })))
 
-// Красивые магазинные предметы
-const shopItems: ShopItem[] = [
-  { 
-    id: 'pillow-1', 
-    name: 'Мягкая подушка', 
-    price: 5, 
-    type: 'petItem', 
-    description: 'Уютная подушка для питомца',
-    emoji: '🛏️',
-    rarity: 'common'
-  },
-  { 
-    id: 'toy-1', 
-    name: 'Когтеточка', 
-    price: 7, 
-    type: 'petItem', 
-    description: 'Классная когтеточка',
-    emoji: '🐾',
-    rarity: 'common'
-  },
-  { 
-    id: 'ocean-theme', 
-    name: 'Океанская тема', 
-    price: 15, 
-    type: 'theme', 
-    description: 'Красивая морская тема',
-    emoji: '🌊',
-    rarity: 'rare'
-  },
-  { 
-    id: 'forest-theme', 
-    name: 'Лесная тема', 
-    price: 15, 
-    type: 'theme', 
-    description: 'Природная зелёная тема',
-    emoji: '🌲',
-    rarity: 'rare'
-  },
-];
+// import { TodoForm } from './components/TodoForm'
+// import { TodoList } from './components/TodoList'
+// import { DoneList } from './components/DoneList'
+// import { Pet } from './components/Pet' // Temporarily disabled
+import { StatsPanel } from './components/StatsPanel'
+import { UiSettings } from './components/UiSettings'
+import { BottomNavigation, NavItem } from './components/BottomNavigation'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { LoadingSpinner } from './components/LoadingSpinner'
+import './styles/attentionZones.css'
 
-const Container = styled.div`
-  min-height: 100vh;
-  background: ${({ theme }) => theme.colors.background};
-  position: relative;
-  
-  /* Мобильная версия */
-  @media (max-width: 767px) {
-    padding: 0.75rem 0.75rem 5rem 0.75rem; /* Отступ снизу для нижней навигации */
-  }
-  
-  /* Десктопная версия */
-  @media (min-width: 768px) {
-    padding: 2rem;
-  }
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin: 0.5rem 0 1.5rem 0;
-  position: relative;
-  
-  @media (min-width: 768px) {
-    margin: 2rem 0 3rem 0;
-  }
-  
-  /* Скрываем на мобильных в разделах кроме home */
-  @media (max-width: 767px) {
-    &.hidden-mobile {
-      display: none;
-    }
-  }
-`;
-
-const Title = styled.h1`
-  font-size: clamp(1.8rem, 5vw, 4rem);
-  font-weight: 800;
-  background: ${({ theme }) => theme.gradients.primary};
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.25rem;
-  
-  /* Fallback для плохой поддержки background-clip */
-  @supports not (-webkit-background-clip: text) {
-    background: none;
-    color: ${({ theme }) => theme.colors.primary};
-  }
-  
-  @media (max-width: 767px) {
-    font-size: 1.8rem;
-    margin-bottom: 0.125rem;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: clamp(0.9rem, 3vw, 1.2rem);
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-weight: 500;
-  margin: 0;
-  
-  @media (max-width: 767px) {
-    font-size: 0.9rem;
-  }
-`;
+const AppContainer = styled.div`
+  min-height: 100dvh;
+  background: ${({ theme }) => theme['color']['bg']};
+  display: grid;
+  grid-template-rows: 1fr auto;
+`
 
 const MainContent = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  max-width: 1200px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 0;
+  width: 100%;
+  /* padding-bottom removed - handled by individual containers */
+`
 
-  @media (min-width: 1024px) {
-    grid-template-columns: 1fr 380px;
-    gap: 2rem;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 0.75rem;
-  }
-`;
-
-const TodoSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  
-  @media (min-width: 768px) {
-    gap: 2rem;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 1rem;
-  }
-`;
-
-const SidePanel = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  
-  @media (min-width: 768px) {
-    gap: 2rem;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 1rem;
-  }
-`;
-
-// Удалили DangerZone - заменили на WellbeingCenter
+type ActiveTab = 'rituals' | 'diary' | 'stats' | 'profile'
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState<NavTab>('home');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('rituals')
+  const [showVictoryBubble, setShowVictoryBubble] = useState(false)
+  const [ownedItems, setOwnedItems] = useState<string[]>([])
+  // const [petMood, setPetMood] = useState<'happy' | 'sleepy' | 'excited' | 'calm'>('happy') // Temporarily disabled
   
+  const { toasts, showToast, hideToast } = useToast()
+  const { todos, resetAllTodos, stats } = useTodos()
+  const { gameState, addPoints, spendPoints, resetGameState, expForNextLevel } = useGameState()
+  const { celebrateCompletion } = useDailyExperience()
   const { 
-    todos, 
-    addTodo, 
-    toggleTodo, 
-    deleteTodo, 
-    clearCompleted, 
-    resetAllTodos, 
-    stats 
-  } = useTodos();
-  
-  const { 
-    gameState, 
-    addPoints, 
-    spendPoints, 
-    addAchievement, 
-    resetGameState, 
-    expProgress, 
-    expForNextLevel 
-  } = useGameState();
+    completedRituals, 
+    dailyStreak, 
+    completeRitual
+  } = useRituals()
+  useUiPrefs()
+  useJournal()
 
-  const { 
-    celebrateCompletion, 
-    feedbackOnAction, 
-    getWelcomeMessage,
-    markVisitToday 
-  } = useDailyExperience();
+  // Load owned items
+  useEffect(() => {
+    const saved = safeGet<string[]>('gropy-owned-items', [])
+    setOwnedItems(saved)
+  }, [])
 
-  // Отмечаем визит при загрузке
-  React.useEffect(() => {
-    markVisitToday();
-  }, []);
+  // Generate and rank suggestions
+  // const allSuggestions = getAdaptedDailySuggestions()
+  const completedSuggestionIds = safeGet<string[]>('gropy-completed-suggestions', [])
+  // const rankedSuggestions = rankSuggestions(allSuggestions, completedSuggestionIds)
 
-  // Обновляем заголовок страницы
-  React.useEffect(() => {
-    document.title = `Gropy - ${stats.pending} дел осталось`;
-  }, [stats.pending]);
+  // Navigation items - simplified to 4 main sections
+  const navItems: NavItem[] = [
+    { id: 'rituals', label: 'Ритуалы', icon: '🌿' },
+    { id: 'diary', label: 'Дневник', icon: '📖' },
+    { id: 'stats', label: 'Прогресс', icon: '📊' },
+    { id: 'profile', label: 'Профиль', icon: '👤' },
+  ]
 
-  // Обработчик выполнения задачи с haptic feedback
-  const handleToggleTodo = (id: string) => {
-    const todo = todos.find(t => t.id === id);
-    if (todo && !todo.completed) {
-      addPoints(todo.points);
-      celebrateCompletion(); // Haptic feedback для Telegram
+  // Handle suggestion completion
+  // const handleCompleteSuggestion = useCallback((suggestion: Suggestion) => {
+  //   // Add as completed suggestion
+  //   const newCompleted = [...completedSuggestionIds, suggestion.id]
+  //   safeSet('gropy-completed-suggestions', newCompleted)
+
+  //   // Add points
+  //   const points = suggestion.energy === 'easy' ? 1 : suggestion.energy === 'medium' ? 2 : 3
+  //   addPoints(points)
+
+  //   // Celebrate
+  //   celebrateCompletion()
+  //   setShowVictoryBubble(true)
+
+  //   // Show toast with undo
+  //   showToast(`готово! +${points}⚡`, {
+  //     action: {
+  //       label: 'отменить',
+  //       onAction: () => {
+  //         // Undo: remove from completed, subtract points
+  //         const updatedCompleted = newCompleted.filter(id => id !== suggestion.id)
+  //         safeSet('gropy-completed-suggestions', updatedCompleted)
+  //         // Note: In a real app, you'd need to track and undo the points too
+  //       },
+  //     },
+  //   })
+  // }, [completedSuggestionIds, addPoints, celebrateCompletion, showToast])
+
+  // Handle suggestion skip
+  // const handleSkipSuggestion = useCallback((_suggestion: Suggestion) => {
+  //   // Just skip, no action needed
+  // }, [])
+
+  // Handle ritual completion
+  const handleCompleteRitual = useCallback((ritualId: string) => {
+    const success = completeRitual(ritualId)
+    if (success) {
+      addPoints(1) // Give points for ritual completion
+      celebrateCompletion()
+      setShowVictoryBubble(true)
+      // setPetMood('excited') // Temporarily disabled
       
-      // Проверка достижений
-      if (stats.completed + 1 === 1) {
-        addAchievement('first-task');
-      }
-      if (stats.completed + 1 === 10) {
-        addAchievement('ten-tasks');
-      }
+      showToast('ритуал выполнен! ✨', {
+        action: {
+          label: 'отменить',
+          onAction: () => {
+            // Undo logic would go here
+          },
+        },
+      })
+
+      // Reset pet mood after celebration - temporarily disabled
+      // setTimeout(() => {
+      //   setPetMood('happy')
+      // }, 3000)
     }
-    toggleTodo(id);
-  };
+  }, [completeRitual, addPoints, celebrateCompletion, showToast])
 
-  // Покупка предметов с feedback
-  const handleBuyItem = (item: ShopItem) => {
-    if (spendPoints(item.price)) {
-      feedbackOnAction(); // Haptic feedback
-      
-      if (item.type === 'theme') {
-        addAchievement('theme-buyer');
-      } else {
-        addAchievement('pet-lover');
-      }
+  // Handle diary entry save
+  const handleSaveDiaryEntry = useCallback(async (entry: { mood: string }) => {
+    showToast('запись сохранена 💚')
+    
+    // Update pet mood based on emotion - temporarily disabled
+    // if (entry.mood === 'sun' || entry.mood === 'rainbow' || entry.mood === 'stars') {
+    //   setPetMood('happy')
+    // } else if (entry.mood === 'rain' || entry.mood === 'storm' || entry.mood === 'clouds') {
+    //   setPetMood('calm')
+    // } else if (entry.mood === 'wind' || entry.mood === 'moon') {
+    //   setPetMood('sleepy')
+    // } else {
+    //   setPetMood('happy')
+    // }
+    
+    return entry
+  }, [showToast])
+
+  // Handle todo completion
+  // const handleToggleTodo = useCallback((id: string) => {
+  //   const todo = todos.find(t => t.id === id)
+  //   if (todo) {
+  //     toggleTodo(id)
+  //     if (!todo.completed) {
+  //       addPoints(todo.points)
+  //       celebrateCompletion()
+  //     }
+  //   }
+  // }, [todos, toggleTodo, addPoints, celebrateCompletion])
+
+  // Handle clear completed todos
+  // const handleClearCompleted = useCallback(() => {
+  //   const clearedTodos = clearCompleted()
+  //   
+  //   showToast('Очищено. Вернуть?', {
+  //     action: {
+  //       label: 'Вернуть',
+  //       onAction: () => {
+  //         restoreCompleted(clearedTodos)
+  //       },
+  //     },
+  //   })
+  //   
+  //   return clearedTodos
+  // }, [clearCompleted, restoreCompleted, showToast])
+
+  // Handle shop purchase
+  const handlePurchase = useCallback((itemId: string) => {
+    // This would need proper item pricing logic
+    const success = spendPoints(10) // Example price
+    if (success) {
+      const newOwned = [...ownedItems, itemId]
+      setOwnedItems(newOwned)
+      safeSet('gropy-owned-items', newOwned)
+      showToast('покупка совершена! 🎉')
+    } else {
+      showToast('недостаточно очков')
     }
-  };
+  }, [ownedItems, spendPoints, showToast])
 
-  // Безопасная очистка (с подтверждением)
-  const handleResetData = () => {
-    resetAllTodos();
-    resetGameState();
-  };
+  // Handle data export
+  const handleExportData = useCallback(() => {
+    const data = {
+      todos,
+      gameState,
+      ownedItems,
+      completedSuggestions: completedSuggestionIds,
+      exportDate: new Date().toISOString(),
+    }
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `gropy-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    
+    showToast('данные экспортированы! 📤')
+  }, [todos, gameState, ownedItems, completedSuggestionIds, showToast])
 
-  const userStats = {
-    totalTasks: stats.total,
-    completedTasks: stats.completed,
-    totalPoints: gameState.points,
-    streak: gameState.streak,
-    level: gameState.level,
-    experience: gameState.experience,
-  };
+  // Handle data import
+  const handleImportData = useCallback((dataString: string) => {
+    try {
+      JSON.parse(dataString)
+      // This would need proper validation and import logic
+      showToast('данные импортированы! 📥')
+    } catch {
+      showToast('ошибка при импорте данных')
+    }
+  }, [showToast])
 
-  const renderMobileContent = () => {
+  // Handle reset all
+  const handleResetAll = useCallback(() => {
+    // Reset in-hook storages
+    resetAllTodos()
+    resetGameState()
+    setOwnedItems([])
+
+    // Remove all localStorage keys for this app
+    try {
+      const keysToRemove: string[] = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key?.startsWith('gropy-')) {
+          keysToRemove.push(key)
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k))
+    } catch {
+      // Ignore errors
+    }
+
+    // Best-effort: clear app caches (PWA)
+    try {
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.filter(name => name.startsWith('gropy')).forEach(name => caches.delete(name))
+        })
+      }
+    } catch {
+      // Ignore errors
+    }
+
+    showToast('все данные сброшены')
+
+    // Hard refresh to ensure all hooks reinitialize from clean storage
+    setTimeout(() => {
+      window.location.reload()
+    }, 250)
+  }, [resetAllTodos, resetGameState, showToast])
+
+  // Hide victory bubble after showing
+  useEffect(() => {
+    if (showVictoryBubble) {
+      const timer = setTimeout(() => {
+        setShowVictoryBubble(false)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [showVictoryBubble])
+
+  const renderContent = () => {
     switch (activeTab) {
-      case 'home':
+      case 'rituals':
         return (
-          <TodoSection>
-            <DailySuggestions onAddTask={addTodo} />
-            
-            <TodoForm 
-              addTodo={addTodo} 
-              maxTodos={50}
-              currentCount={stats.total}
+          <Suspense fallback={<LoadingSpinner message="Загружаем ритуалы..." />}>
+            <RitualsPager
+              completedRituals={completedRituals}
+              onCompleteRitual={handleCompleteRitual}
+              maxDailyRituals={3}
             />
-            
-            <div>
-              <h2>🌸 Что хочешь сделать? ({stats.pending})</h2>
-              <TodoList 
-                todos={todos.filter(todo => !todo.completed)} 
-                onToggle={handleToggleTodo}
-                onDelete={deleteTodo}
+          </Suspense>
+        )
+        case 'diary':
+          return (
+            <Suspense fallback={<LoadingSpinner message="Загружаем дневник..." />}>
+              <EmotionalDiary
+                onSaveEntry={handleSaveDiaryEntry}
               />
-            </div>
-            
-            <div>
-              <h2>✨ Уже сделано! ({stats.completed})</h2>
-              <TodoList 
-                todos={todos.filter(todo => todo.completed)} 
-                onToggle={handleToggleTodo}
-                onDelete={deleteTodo}
-                showClearCompleted={stats.completed > 0}
-                onClearCompleted={clearCompleted}
-              />
-            </div>
-          </TodoSection>
-        );
-      
-      case 'shop':
+            </Suspense>
+          )
+      case 'stats':
         return (
-          <SidePanel>
-            <Shop 
-              items={shopItems} 
-              onBuyItem={handleBuyItem}
-              userPoints={gameState.points}
+          <>
+            <StatsPanel
+              level={gameState.level}
+              experience={gameState.experience}
+              expForNextLevel={expForNextLevel}
+              points={gameState.points}
+              streak={dailyStreak}
+              totalCompleted={stats.completed}
+              totalPoints={stats.totalPoints}
             />
-          </SidePanel>
-        );
-      
-      case 'pet':
-        return (
-          <SidePanel>
-            <Pet level={gameState.level} />
-          </SidePanel>
-        );
-      
+            <Suspense fallback={<LoadingSpinner message="Загружаем магазин..." />}>
+              <Shop
+                points={gameState.points}
+                ownedItems={ownedItems}
+                onPurchase={handlePurchase}
+              />
+            </Suspense>
+          </>
+        )
       case 'profile':
         return (
-          <ProfileSection
-            stats={userStats}
-            expProgress={expProgress}
-            expForNextLevel={expForNextLevel}
-            onResetData={handleResetData}
-          />
-        );
-      
+          <>
+            <UiSettings />
+            <Suspense fallback={<LoadingSpinner message="Загружаем поддержку..." />}>
+              <SupportCard />
+            </Suspense>
+            <Suspense fallback={<LoadingSpinner message="Загружаем настройки звука..." />}>
+              <SoundSettings />
+            </Suspense>
+            <Suspense fallback={<LoadingSpinner message="Загружаем профиль..." />}>
+              <ProfileSection
+                onExportData={handleExportData}
+                onImportData={handleImportData}
+                onResetAll={handleResetAll}
+              />
+            </Suspense>
+          </>
+        )
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   return (
-    <ThemeProvider>
-      <GlobalStyles />
-      <Container>
-        {/* Десктопная навигация (только на больших экранах) */}
-        <div className="desktop-only">
-          <ThemeSelector />
-          <StatsPanel 
-            stats={userStats} 
-            expProgress={expProgress} 
-            expForNextLevel={expForNextLevel} 
-          />
-        </div>
-        
-        {/* Заголовок - показываем только на главной в мобильной версии */}
-        <Header 
-          className={`fade-in ${activeTab !== 'home' ? 'hidden-mobile' : ''}`}
-        >
-          <Title>Gropy</Title>
-          <Subtitle>Твой добрый помощник в делах ✨</Subtitle>
-        </Header>
-
-        {/* Мобильный контент - только один раздел на экране */}
-        <div className="mobile-content">
-          {renderMobileContent()}
-        </div>
-
-        {/* Десктопный контент - классический layout */}
-        <MainContent className="desktop-content">
-          <TodoSection>
-            <DailySuggestions onAddTask={addTodo} />
-            
-            <TodoForm 
-              addTodo={addTodo} 
-              maxTodos={50}
-              currentCount={stats.total}
-            />
-            
-            <div>
-              <h2>🌸 Что хочешь сделать? ({stats.pending})</h2>
-              <TodoList 
-                todos={todos.filter(todo => !todo.completed)} 
-                onToggle={handleToggleTodo}
-                onDelete={deleteTodo}
-              />
-            </div>
-            
-            <div>
-              <h2>✨ Уже сделано! ({stats.completed})</h2>
-              <TodoList 
-                todos={todos.filter(todo => todo.completed)} 
-                onToggle={handleToggleTodo}
-                onDelete={deleteTodo}
-                showClearCompleted={stats.completed > 0}
-                onClearCompleted={clearCompleted}
-              />
-            </div>
-          </TodoSection>
-
-          <SidePanel>
-            <Shop 
-              items={shopItems} 
-              onBuyItem={handleBuyItem}
-              userPoints={gameState.points}
-            />
-            <Pet level={gameState.level} />
-          </SidePanel>
+    <ErrorBoundary>
+      <AppContainer>
+        <MainContent>
+          {renderContent()}
         </MainContent>
 
-        {/* WellbeingCenter только на десктопе */}
-        <div className="desktop-only">
-          <WellbeingCenter 
-            completedToday={stats.completed}
-            totalPoints={gameState.points}
-            streak={gameState.streak}
-            onResetData={handleResetData}
-          />
-        </div>
+        {/* Pet component temporarily disabled
+        <Pet
+          showVictoryBubble={showVictoryBubble}
+          onVictoryBubbleShown={() => setShowVictoryBubble(false)}
+          petMood={petMood}
+        />
+        */}
 
-        {/* Нижняя навигация - только на мобильных */}
-        <div className="mobile-only">
-          <BottomNavigation 
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            pendingTasks={stats.pending}
-            userPoints={gameState.points}
-            level={gameState.level}
-          />
-        </div>
-      </Container>
-    </ThemeProvider>
-  );
-};
+        <EdgePeek />
 
-export default App;
+        <Toast toasts={toasts} onHide={hideToast} />
+
+        <BottomNavigation
+          items={navItems}
+          activeItem={activeTab}
+          onItemClick={(itemId) => setActiveTab(itemId as ActiveTab)}
+        />
+      </AppContainer>
+    </ErrorBoundary>
+  )
+}
+
+export default App

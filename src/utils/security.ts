@@ -1,85 +1,48 @@
-/**
- * Утилиты безопасности для Gropy
- */
-import DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify'
 
-// Безопасная санитизация текста от XSS
 export const sanitizeText = (text: string): string => {
-  if (!text || typeof text !== 'string') return '';
+  // Basic validation
+  if (typeof text !== 'string') return ''
+  if (text.length > 200) return text.slice(0, 200)
   
-  // Используем DOMPurify для максимальной защиты
-  const cleaned = DOMPurify.sanitize(text, { 
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true
-  });
-  
-  return cleaned.trim().slice(0, 200); // Ограничиваем длину
-};
-
-// Валидация задачи
-export const validateTodoText = (text: string): { isValid: boolean; error?: string } => {
-  if (!text || text.trim().length === 0) {
-    return { isValid: false, error: 'Задача не может быть пустой' };
-  }
-  
-  if (text.length > 200) {
-    return { isValid: false, error: 'Задача слишком длинная (макс. 200 символов)' };
-  }
-  
-  // Проверка на подозрительные паттерны
-  const suspiciousPatterns = [
+  // Check for dangerous patterns
+  const dangerousPatterns = [
     /<script/i,
-    /javascript:/i,
     /on\w+\s*=/i,
-    /<iframe/i,
-    /<object/i,
-    /<embed/i
-  ];
+    /javascript:/i,
+    /data:/i,
+  ]
   
-  for (const pattern of suspiciousPatterns) {
-    if (pattern.test(text)) {
-      return { isValid: false, error: 'Недопустимые символы в тексте задачи' };
-    }
+  if (dangerousPatterns.some(pattern => pattern.test(text))) {
+    return ''
   }
   
-  return { isValid: true };
-};
+  // Sanitize with DOMPurify
+  return DOMPurify.sanitize(text, { 
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: []
+  })
+}
 
-// Безопасная работа с localStorage
-export const safeLocalStorage = {
-  get: (key: string): any => {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : null;
-    } catch (error) {
-      console.warn(`Ошибка чтения из localStorage для ключа ${key}:`, error);
-      return null;
-    }
-  },
+export const validateTodoText = (text: string): { isValid: boolean; error?: string } => {
+  const sanitized = sanitizeText(text)
   
-  set: (key: string, value: any): boolean => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch (error) {
-      console.warn(`Ошибка записи в localStorage для ключа ${key}:`, error);
-      return false;
-    }
-  },
-  
-  remove: (key: string): boolean => {
-    try {
-      localStorage.removeItem(key);
-      return true;
-    } catch (error) {
-      console.warn(`Ошибка удаления из localStorage для ключа ${key}:`, error);
-      return false;
-    }
+  if (!sanitized.trim()) {
+    return { isValid: false, error: 'Текст не может быть пустым' }
   }
-};
+  
+  if (sanitized.length < 2) {
+    return { isValid: false, error: 'Минимум 2 символа' }
+  }
+  
+  if (sanitized.length > 200) {
+    return { isValid: false, error: 'Максимум 200 символов' }
+  }
+  
+  return { isValid: true }
+}
 
-// Генерация безопасного ID
-export const generateSecureId = (): string => {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-};
+
+
+
+

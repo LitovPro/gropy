@@ -1,97 +1,104 @@
-import { useState, useEffect, useCallback } from 'react';
-import { GameState } from '../types';
-import { safeLocalStorage } from '../utils/security';
+import { useState, useEffect, useCallback } from 'react'
+import { GameState } from '../types'
+import { safeGet, safeSet } from '../utils/ls'
 
-const STORAGE_KEY = 'gropy-game-state';
+const STORAGE_KEY = 'gropy-game-state'
 
-const initialGameState: GameState = {
+const getTodayUTC = (): string => {
+  return new Date().toISOString().split('T')[0]
+}
+
+const calculateExpForNextLevel = (level: number): number => {
+  return level * 100 + (level - 1) * 50
+}
+
+const defaultGameState: GameState = {
   points: 0,
   level: 1,
   experience: 0,
   streak: 0,
-  lastActivityDate: new Date().toDateString(),
+  lastActivityDateUTC: getTodayUTC(),
   achievements: [],
-};
-
-// Опыт необходимый для следующего уровня
-const getExpForLevel = (level: number): number => {
-  return level * 100 + (level - 1) * 50;
-};
+}
 
 export const useGameState = () => {
-  const [gameState, setGameState] = useState<GameState>(() => {
-    const saved = safeLocalStorage.get(STORAGE_KEY);
-    return saved || initialGameState;
-  });
+  const [gameState, setGameState] = useState<GameState>(defaultGameState)
 
-  // Автосохранение
   useEffect(() => {
-    safeLocalStorage.set(STORAGE_KEY, gameState);
-  }, [gameState]);
+    const saved = safeGet<GameState>(STORAGE_KEY, defaultGameState)
+    setGameState(saved)
+  }, [])
 
-  const addPoints = useCallback((points: number) => {
-    setGameState(prev => {
-      const newExp = prev.experience + points;
-      const expForNextLevel = getExpForLevel(prev.level);
-      
-      let newLevel = prev.level;
-      let remainingExp = newExp;
-      
-      // Проверяем повышение уровня
-      while (remainingExp >= expForNextLevel && newLevel < 100) {
-        remainingExp -= expForNextLevel;
-        newLevel++;
+  const saveGameState = useCallback((newState: GameState) => {
+    setGameState(newState)
+    safeSet(STORAGE_KEY, newState)
+  }, [])
+
+  const addPoints = useCallback(
+    (points: number) => {
+      const newState = { ...gameState }
+      newState.points += points
+      newState.experience += points
+
+      // Check for level up
+      const expForNext = calculateExpForNextLevel(newState.level)
+      if (newState.experience >= expForNext) {
+        newState.level += 1
+        newState.experience -= expForNext
       }
 
-      // Обновляем стрик
-      const today = new Date().toDateString();
-      const yesterday = new Date(Date.now() - 86400000).toDateString();
-      let newStreak = prev.streak;
-      
-      if (prev.lastActivityDate === yesterday) {
-        newStreak++;
-      } else if (prev.lastActivityDate !== today) {
-        newStreak = 1;
+      // Update streak
+      const today = getTodayUTC()
+      if (newState.lastActivityDateUTC !== today) {
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        const yesterdayUTC = yesterday.toISOString().split('T')[0]
+
+        if (newState.lastActivityDateUTC === yesterdayUTC) {
+          newState.streak += 1
+        } else {
+          newState.streak = 1
+        }
+        newState.lastActivityDateUTC = today
       }
 
-      return {
-        ...prev,
-        points: prev.points + points,
-        level: newLevel,
-        experience: remainingExp,
-        streak: newStreak,
-        lastActivityDate: today,
-      };
-    });
-  }, []);
+      saveGameState(newState)
+      return newState
+    },
+    [gameState, saveGameState]
+  )
 
-  const spendPoints = useCallback((amount: number): boolean => {
-    if (gameState.points >= amount) {
-      setGameState(prev => ({
-        ...prev,
-        points: prev.points - amount,
-      }));
-      return true;
-    }
-    return false;
-  }, [gameState.points]);
+  const spendPoints = useCallback(
+    (points: number) => {
+      if (gameState.points >= points) {
+        const newState = { ...gameState, points: gameState.points - points }
+        saveGameState(newState)
+        return true
+      }
+      return false
+    },
+    [gameState, saveGameState]
+  )
 
-  const addAchievement = useCallback((achievement: string) => {
-    setGameState(prev => ({
-      ...prev,
-      achievements: prev.achievements.includes(achievement) 
-        ? prev.achievements 
-        : [...prev.achievements, achievement],
-    }));
-  }, []);
+  const addAchievement = useCallback(
+    (key: string) => {
+      if (!gameState.achievements.includes(key)) {
+        const newState = {
+          ...gameState,
+          achievements: [...gameState.achievements, key],
+        }
+        saveGameState(newState)
+      }
+    },
+    [gameState, saveGameState]
+  )
 
   const resetGameState = useCallback(() => {
-    setGameState(initialGameState);
-  }, []);
+    saveGameState(defaultGameState)
+  }, [saveGameState])
 
-  // Вычисляемые значения
-  const expForNextLevel = getExpForLevel(gameState.level);
-  const expProgress = gameState.level < 100 ? (gameState.experience / expForNextLevel) * 100 : 100;
+  const expForNextLevel = calculateExpForNextLevel(gameState.level)
+  const progressToNextLevel = gameState.experience / expForNextLevel
 
   return {
     gameState,
@@ -100,6 +107,11 @@ export const useGameState = () => {
     addAchievement,
     resetGameState,
     expForNextLevel,
-    expProgress,
-  };
-};
+    progressToNextLevel,
+  }
+}
+
+
+
+
+

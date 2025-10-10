@@ -1,228 +1,270 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-
-interface TodoFormProps {
-  addTodo: (text: string, category?: 'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare', energy?: 'low' | 'medium' | 'high') => void;
-  maxTodos: number;
-  currentCount: number;
-}
+import React, { useState } from 'react'
+import styled from 'styled-components'
+import { motion } from 'framer-motion'
+import { Category, Energy } from '../types'
+import { tokens } from '../design/tokens'
+import { validateTodoText } from '../utils/security'
 
 const FormContainer = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  padding: 1rem;
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  box-shadow: ${({ theme }) => theme.shadows.medium};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: ${({ theme }) => theme.shadows.large};
-  }
-  
-  @media (min-width: 768px) {
-    padding: 1.5rem;
-  }
-  
-  @media (max-width: 767px) {
-    border-radius: ${({ theme }) => theme.borderRadius.medium};
-    box-shadow: ${({ theme }) => theme.shadows.small};
-  }
-`;
+  padding: 16px;
+  background: ${({ theme }) => theme.color.surface};
+  border-radius: ${tokens.radius.card};
+  margin: 16px;
+  border: 1px solid ${({ theme }) => theme.color.border};
+`
 
-const Form = styled.form`
+const FormTitle = styled.h2`
+  font-size: 18px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.color.text};
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+`
+
+const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-`;
+  gap: 12px;
+`
 
-const InputContainer = styled.div`
-  position: relative;
-`;
-
-const Input = styled.input`
+const TextInput = styled.input`
   width: 100%;
-  padding: 1.25rem;
-  border: 2px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  font-size: 1.1rem;
-  background: ${({ theme }) => theme.colors.background};
-  color: ${({ theme }) => theme.colors.text};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
-  }
-  
-  &::placeholder {
-    color: ${({ theme }) => theme.colors.textSecondary};
-  }
-  
-  @media (max-width: 768px) {
-    padding: 1rem;
-    font-size: 16px; /* Prevents zoom on iOS */
-    border-radius: ${({ theme }) => theme.borderRadius.small};
-  }
-`;
+  padding: 12px 16px;
+  border: 1px solid ${({ theme }) => theme.color.border};
+  border-radius: ${tokens.radius.button};
+  font-size: 16px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.text};
+  background: ${({ theme }) => theme.color.surface};
+  transition: border-color 0.2s ease;
 
-const ControlsRow = styled.div`
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+  &::placeholder {
+    color: ${({ theme }) => theme.color.textMuted};
   }
-`;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.color.accent};
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color.accent};
+    outline-offset: 2px;
+  }
+`
+
+const SelectGroup = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+`
 
 const Select = styled.select`
-  padding: 0.75rem 1rem;
-  border: 2px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  background: ${({ theme }) => theme.colors.background};
-  color: ${({ theme }) => theme.colors.text};
-  font-size: 0.875rem;
+  padding: 12px 16px;
+  border: 1px solid ${({ theme }) => theme.color.border};
+  border-radius: ${tokens.radius.button};
+  font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.text};
+  background: ${({ theme }) => theme.color.surface};
   cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
-  }
-`;
+  transition: border-color 0.2s ease;
 
-const SubmitButton = styled.button`
-  padding: 0.75rem 2rem;
-  background: ${({ theme }) => theme.gradients.primary};
-  color: white;
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  font-size: 1rem;
+  &:focus {
+    border-color: ${({ theme }) => theme.color.accent};
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color.accent};
+    outline-offset: 2px;
+  }
+`
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+`
+
+const Button = styled.button<{ $variant: 'primary' | 'secondary' }>`
+  flex: 1;
+  height: ${tokens.size.tap};
+  border-radius: ${tokens.radius.button};
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: ${({ theme }) => theme.shadows.medium};
-  
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadows.large};
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  ${({ $variant, theme }) =>
+    $variant === 'primary'
+      ? `
+        background: ${theme.color.accent};
+        color: white;
+        
+        &:hover:not(:disabled) {
+          opacity: 0.9;
+        }
+        
+        &:active:not(:disabled) {
+          transform: scale(0.98);
+        }
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      `
+      : `
+        background: ${theme.color.surface};
+        color: ${theme.color.textMuted};
+        border: 1px solid ${theme.color.border};
+        
+        &:hover:not(:disabled) {
+          background: ${theme.color.bg};
+        }
+        
+        &:active:not(:disabled) {
+          transform: scale(0.98);
+        }
+      `}
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color.accent};
+    outline-offset: 2px;
   }
-  
-  &:active {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
+`
 
 const Counter = styled.div`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  text-align: center;
-  margin-top: 0.5rem;
-`;
+  font-size: 12px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.textMuted};
+  text-align: right;
+  margin-top: 4px;
+`
 
-const ErrorMessage = styled.div`
-  color: ${({ theme }) => theme.colors.error};
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: ${({ theme }) => theme.colors.error}10;
-  border-radius: ${({ theme }) => theme.borderRadius.small};
-  border-left: 3px solid ${({ theme }) => theme.colors.error};
-`;
+const ErrorMessage = styled(motion.div)`
+  font-size: 12px;
+  font-weight: 500;
+  color: #EF4444;
+  margin-top: 4px;
+`
 
-const TodoForm: React.FC<TodoFormProps> = ({ addTodo, maxTodos, currentCount }) => {
-  const [text, setText] = useState<string>('');
-  const [category, setCategory] = useState<'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare'>('personal');
-  const [energy, setEnergy] = useState<'low' | 'medium' | 'high'>('low');
-  const [error, setError] = useState<string>('');
+interface TodoFormProps {
+  onSubmit: (text: string, category: Category, energy: Energy) => void
+  maxLength?: number
+}
+
+export const TodoForm: React.FC<TodoFormProps> = ({
+  onSubmit,
+  maxLength = 50,
+}) => {
+  const [text, setText] = useState('')
+  const [category, setCategory] = useState<Category>('daily')
+  const [energy, setEnergy] = useState<Energy>('easy')
+  const [error, setError] = useState<string>('')
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault()
     
-    if (!text.trim()) {
-      setError('Введите текст задачи');
-      return;
-    }
-    
-    if (currentCount >= maxTodos) {
-      setError(`Максимум ${maxTodos} задач`);
-      return;
+    const validation = validateTodoText(text)
+    if (!validation.isValid) {
+      setError(validation.error || 'Ошибка валидации')
+      return
     }
 
     try {
-      addTodo(text.trim(), category, energy);
-      setText('');
-      setCategory('personal');
-      setEnergy('low');
+      onSubmit(text, category, energy)
+      setText('')
+      setError('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не получилось добавить задачу');
+      setError(err instanceof Error ? err.message : 'Ошибка при добавлении')
     }
-  };
+  }
 
-  const isAtLimit = currentCount >= maxTodos;
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newText = e.target.value
+    if (newText.length <= maxLength) {
+      setText(newText)
+      setError('')
+    }
+  }
 
   return (
-    <FormContainer className="fade-in">
-      <h2 style={{ fontSize: 'clamp(1.1rem, 4vw, 1.4rem)', margin: '0 0 1rem 0' }}>
-        ✨ Что хочешь сделать?
-      </h2>
-      <Form onSubmit={handleSubmit}>
-        <InputContainer>
-          <Input
+    <FormContainer id="todo-section">
+      <FormTitle>Добавить задачу</FormTitle>
+      <form onSubmit={handleSubmit}>
+        <InputGroup>
+          <TextInput
             type="text"
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Например: выпить стакан воды ☺️"
-            disabled={isAtLimit}
-            maxLength={200}
+            onChange={handleTextChange}
+            placeholder="Например: стакан воды 😊"
+            maxLength={maxLength}
+            required
           />
-        </InputContainer>
-        
-        <ControlsRow>
-          <Select 
-            value={category} 
-            onChange={(e) => setCategory(e.target.value as 'daily' | 'work' | 'personal' | 'health' | 'learning' | 'selfcare')}
-            disabled={isAtLimit}
-          >
-            <option value="daily">🌅 Каждый день</option>
-            <option value="selfcare">🌸 Забота о себе</option>
-            <option value="personal">🏠 Личное</option>
-            <option value="health">💚 Здоровье</option>
-            <option value="work">💼 Работа</option>
-            <option value="learning">📚 Изучение</option>
-          </Select>
+          <Counter>
+            {text.length}/{maxLength}
+          </Counter>
+          {error && (
+            <ErrorMessage
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {error}
+            </ErrorMessage>
+          )}
           
-          <Select 
-            value={energy} 
-            onChange={(e) => setEnergy(e.target.value as 'low' | 'medium' | 'high')}
-            disabled={isAtLimit}
+          <SelectGroup>
+            <Select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as Category)}
+            >
+              <option value="daily">Повседневное</option>
+              <option value="selfcare">Забота о себе</option>
+              <option value="health">Здоровье</option>
+              <option value="work">Работа</option>
+              <option value="study">Учёба</option>
+            </Select>
+            
+            <Select
+              value={energy}
+              onChange={(e) => setEnergy(e.target.value as Energy)}
+            >
+              <option value="easy">Легко</option>
+              <option value="medium">Средне</option>
+              <option value="energetic">Энергично</option>
+            </Select>
+          </SelectGroup>
+        </InputGroup>
+        
+        <ButtonGroup>
+          <Button type="submit" $variant="primary" disabled={!text.trim()}>
+            Добавить
+          </Button>
+          <Button
+            type="button"
+            $variant="secondary"
+            onClick={() => {
+              setText('')
+              setError('')
+            }}
           >
-            <option value="low">🟢 Легко (1 очко)</option>
-            <option value="medium">🟡 Средне (2 очка)</option>
-            <option value="high">🟠 Энергично (3 очка)</option>
-          </Select>
-          
-          <SubmitButton type="submit" disabled={isAtLimit || !text.trim()}>
-            Добавить ✨
-          </SubmitButton>
-        </ControlsRow>
-        
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        
-        <Counter>
-          {currentCount} из {maxTodos} дел
-        </Counter>
-      </Form>
+            Очистить
+          </Button>
+        </ButtonGroup>
+      </form>
     </FormContainer>
-  );
-};
+  )
+}
 
-export default TodoForm;
+
+
+
+

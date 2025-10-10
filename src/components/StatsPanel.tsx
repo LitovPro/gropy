@@ -1,186 +1,174 @@
-import React from 'react';
-import styled from 'styled-components';
-import { UserStats } from '../types';
-
-interface StatsPanelProps {
-  stats: UserStats;
-  expProgress: number;
-  expForNextLevel: number;
-}
+import React from 'react'
+import styled from 'styled-components'
+import { motion } from 'framer-motion'
+import { tokens } from '../design/tokens'
 
 const StatsContainer = styled.div`
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: ${({ theme }) => theme.colors.surface}ee;
-  backdrop-filter: blur(15px);
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  box-shadow: ${({ theme }) => theme.shadows.large};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  min-width: 160px;
-  max-width: calc(100vw - 20px);
-  
-  @media (min-width: 768px) {
-    top: 20px;
-    right: 20px;
-    padding: 1.5rem;
-    gap: 1rem;
-    min-width: 200px;
-  }
-  
-  @media (max-width: 480px) {
-    top: 8px;
-    right: 8px;
-    padding: 0.6rem;
-    gap: 0.4rem;
-    min-width: 140px;
-  }
-`;
+  padding: 16px;
+  padding-bottom: calc(16px + 56px + env(safe-area-inset-bottom, 0));
+  background: ${({ theme }) => theme.color.surface};
+  border-radius: ${tokens.radius.card};
+  margin: 16px;
+  border: 1px solid ${({ theme }) => theme.color.border};
+`
 
-const StatItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  background: ${({ theme }) => theme.gradients.card};
-  transition: transform 0.2s ease;
-  
-  &:hover {
-    transform: translateX(5px);
-  }
-`;
+const StatsTitle = styled.h2`
+  font-size: 18px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.color.text};
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+`
 
-const StatIcon = styled.span`
-  font-size: 1.5rem;
-  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
-`;
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+`
 
-const StatContent = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
+const StatCard = styled(motion.div)`
+  background: ${({ theme }) => theme.color.bg};
+  border: 1px solid ${({ theme }) => theme.color.border};
+  border-radius: ${tokens.radius.card};
+  padding: 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+`
 
-const StatLabel = styled.span`
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-weight: 500;
+const StatValue = styled.div`
+  font-size: 24px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.color.text};
+  margin-bottom: 4px;
+  line-height: 1;
+`
+
+const StatLabel = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.color.textMuted};
   text-transform: uppercase;
   letter-spacing: 0.5px;
-`;
+  line-height: 1.4;
+`
 
-const StatValue = styled.span`
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.text};
-`;
+const StatIcon = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  opacity: 0.3;
+`
 
-const LevelContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const LevelInfo = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const LevelBadge = styled.span`
-  padding: 0.25rem 0.75rem;
-  background: ${({ theme }) => theme.gradients.secondary};
-  color: white;
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-`;
-
-const ProgressBarContainer = styled.div`
+const ProgressBar = styled.div`
   width: 100%;
-  height: 8px;
-  background: ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.large};
+  height: 4px;
+  background: ${({ theme }) => theme.color.border};
+  border-radius: 2px;
   overflow: hidden;
-  position: relative;
-`;
+  margin-top: 8px;
+`
 
-const ProgressBar = styled.div<{ progress: number }>`
-  width: ${props => props.progress}%;
+const ProgressFill = styled(motion.div)<{ $progress: number }>`
   height: 100%;
-  background: ${({ theme }) => theme.gradients.secondary};
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: shimmer 2s infinite;
-  }
-  
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-`;
+  background: ${({ theme }) => theme.color.accent};
+  border-radius: 2px;
+  width: ${({ $progress }) => Math.min(100, Math.max(0, $progress))}%;
+`
 
-const ExpText = styled.span`
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  margin-top: 0.25rem;
-`;
+const ProgressText = styled.div`
+  font-size: 10px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.textMuted};
+  margin-top: 4px;
+  text-align: center;
+`
 
-const StatsPanel: React.FC<StatsPanelProps> = ({ stats, expProgress, expForNextLevel }) => {
+interface StatsPanelProps {
+  level: number
+  experience: number
+  expForNextLevel: number
+  points: number
+  streak: number
+  totalCompleted: number
+  totalPoints: number
+}
+
+export const StatsPanel: React.FC<StatsPanelProps> = ({
+  level,
+  experience,
+  expForNextLevel,
+  points,
+  streak,
+  totalCompleted,
+  totalPoints: _totalPoints,
+}) => {
+  const progressToNextLevel = (experience / expForNextLevel) * 100
+
+  const stats = [
+    {
+      icon: '⭐',
+      value: level,
+      label: 'Уровень',
+    },
+    {
+      icon: '⚡',
+      value: points,
+      label: 'Очки',
+    },
+    {
+      icon: '🔥',
+      value: streak,
+      label: 'Стрик',
+    },
+    {
+      icon: '✅',
+      value: totalCompleted,
+      label: 'Выполнено',
+    },
+  ]
+
   return (
-    <StatsContainer className="fade-in">
-      <LevelContainer>
-        <LevelInfo>
-          <StatLabel>Уровень</StatLabel>
-          <LevelBadge>LVL {stats.level}</LevelBadge>
-        </LevelInfo>
-        <ProgressBarContainer>
-          <ProgressBar progress={expProgress} />
-        </ProgressBarContainer>
-        <ExpText>{stats.experience} / {expForNextLevel} опыта</ExpText>
-      </LevelContainer>
+    <StatsContainer>
+      <StatsTitle>Статистика</StatsTitle>
+      
+      <StatsGrid>
+        {stats.map((stat, index) => (
+          <StatCard
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
+          >
+            <StatIcon>{stat.icon}</StatIcon>
+            <StatValue>{stat.value}</StatValue>
+            <StatLabel>{stat.label}</StatLabel>
+          </StatCard>
+        ))}
+      </StatsGrid>
 
-      <StatItem>
-        <StatIcon>⚡</StatIcon>
-        <StatContent>
-          <StatLabel>Очки</StatLabel>
-          <StatValue>{stats.totalPoints.toLocaleString()}</StatValue>
-        </StatContent>
-      </StatItem>
-
-      <StatItem>
-        <StatIcon>🔥</StatIcon>
-        <StatContent>
-          <StatLabel>Стрик</StatLabel>
-          <StatValue>{stats.streak} дней</StatValue>
-        </StatContent>
-      </StatItem>
-
-      <StatItem>
-        <StatIcon>✅</StatIcon>
-        <StatContent>
-          <StatLabel>Выполнено</StatLabel>
-          <StatValue>{stats.completedTasks} / {stats.totalTasks}</StatValue>
-        </StatContent>
-      </StatItem>
+      <StatCard
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.3 }}
+        style={{ marginTop: '12px' }}
+      >
+        <StatIcon>📈</StatIcon>
+        <StatValue>{experience}</StatValue>
+        <StatLabel>Опыт</StatLabel>
+        <ProgressBar>
+          <ProgressFill
+            $progress={progressToNextLevel}
+            initial={{ width: 0 }}
+            animate={{ width: `${progressToNextLevel}%` }}
+            transition={{ delay: 0.6, duration: 0.5, ease: 'easeOut' }}
+          />
+        </ProgressBar>
+        <ProgressText>
+          {experience} / {expForNextLevel} до {level + 1} уровня
+        </ProgressText>
+      </StatCard>
     </StatsContainer>
-  );
-};
-
-export default StatsPanel;
+  )
+}

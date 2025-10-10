@@ -1,256 +1,371 @@
-import React, { useState, useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
-
-interface PetProps {
-  level: number;
-}
+import React, { useState, useEffect } from 'react'
+import styled from 'styled-components'
+import { motion, AnimatePresence } from 'framer-motion'
+import { tokens } from '../design/tokens'
+import { hapticLight } from '../utils/haptics'
+import { playPetInteraction } from '../utils/sounds'
 
 const PetContainer = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  box-shadow: ${({ theme }) => theme.shadows.medium};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 1.5rem;
-  text-align: center;
+  position: fixed;
+  bottom: 150px;
+  right: 24px;
+  z-index: 40;
+  pointer-events: none;
+
+  /* Left-handed support */
+  :root[data-left-handed="true"] & {
+    right: auto;
+    left: 24px;
+  }
+
+  /* Ensure pet doesn't overlap with navigation */
+  @media (max-width: 480px) {
+    bottom: 120px;
+  }
+
+  /* For very small screens, move pet higher */
+  @media (max-width: 360px) {
+    bottom: 150px;
+    right: 16px;
+  }
+
+  /* Left-handed support for small screens */
+  :root[data-left-handed="true"] & {
+    @media (max-width: 360px) {
+      right: auto;
+      left: 16px;
+    }
+  }
+`
+
+const PetButton = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !prop.startsWith('$')
+})`
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, ${({ theme }) => theme.color.pet.primary}, ${({ theme }) => theme.color.pet.secondary});
+  border: 4px solid ${({ theme }) => theme.color.pet.accent};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 8px 25px ${tokens.color.shadow}, 0 0 0 1px ${({ theme }) => theme.color.pet.accent}40;
+  pointer-events: auto;
+  transition: all ${tokens.motion.base} ${tokens.motion.easing};
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: ${({ theme }) => theme.gradients.primary};
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, ${({ theme }) => theme.color.pet.accent}20 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity ${tokens.motion.base} ${tokens.motion.easing};
   }
-  
-  @media (min-width: 768px) {
-    padding: 2rem;
-  }
-  
-  @media (max-width: 767px) {
-    padding: 1rem;
-    border-radius: ${({ theme }) => theme.borderRadius.medium};
-    box-shadow: ${({ theme }) => theme.shadows.small};
-  }
-`;
 
-const PetHeader = styled.h2`
-  margin: 0 0 1.5rem 0;
-  color: ${({ theme }) => theme.colors.text};
-  font-size: 1.5rem;
-  font-weight: 700;
-`;
+  &::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 50%;
+    border: 2px solid ${({ theme }) => theme.color.pet.accent}30;
+    animation: pulse 2s ease-in-out infinite;
+  }
 
-const floatAnimation = keyframes`
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg); 
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.3;
+    }
   }
-  25% { 
-    transform: translateY(-8px) rotate(1deg); 
-  }
-  50% { 
-    transform: translateY(-4px) rotate(0deg); 
-  }
-  75% { 
-    transform: translateY(-12px) rotate(-1deg); 
-  }
-`;
 
-const PetAvatar = styled.div<{ level: number }>`
-  font-size: ${({ level }) => Math.min(60 + level * 2, 100)}px;
-  animation: ${floatAnimation} 3s ease-in-out infinite;
-  margin: 1rem 0;
-  filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.1));
-  transition: font-size 0.5s ease;
-  cursor: pointer;
-  
   &:hover {
-    transform: scale(1.1);
-    animation-duration: 1s;
-  }
-`;
-
-const PetStats = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1.5rem;
-`;
-
-const StatRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  background: ${({ theme }) => theme.colors.background};
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-`;
-
-const StatLabel = styled.span`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-weight: 500;
-`;
-
-const StatValue = styled.span`
-  font-size: 1rem;
-  color: ${({ theme }) => theme.colors.text};
-  font-weight: 600;
-`;
-
-const LevelBadge = styled.div`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.5rem 1rem;
-  background: ${({ theme }) => theme.gradients.secondary};
-  color: white;
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  font-size: 0.875rem;
-  font-weight: 700;
-  box-shadow: ${({ theme }) => theme.shadows.medium};
-`;
-
-const MoodIndicator = styled.div<{ mood: string }>`
-  margin: 1rem 0;
-  font-size: 1.5rem;
-  padding: 0.5rem;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  background: ${({ theme }) => theme.colors.primary}10;
-  border: 1px solid ${({ theme }) => theme.colors.primary}20;
-`;
-
-const InteractionButton = styled.button`
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: ${({ theme }) => theme.gradients.primary};
-  color: white;
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadows.medium};
-  }
-`;
-
-const Pet: React.FC<PetProps> = ({ level }) => {
-  const [mood, setMood] = useState('happy');
-  const [lastInteraction, setLastInteraction] = useState<number>(Date.now());
-
-  // Эволюция питомца по уровням
-  const getPetEmoji = (level: number): string => {
-    if (level < 5) return '🐱'; // Котёнок
-    if (level < 10) return '🐈'; // Кот
-    if (level < 20) return '🦁'; // Лев
-    if (level < 30) return '🐯'; // Тигр
-    return '🐲'; // Дракон!
-  };
-
-  const getPetName = (level: number): string => {
-    if (level < 5) return 'Котёнок';
-    if (level < 10) return 'Кот';
-    if (level < 20) return 'Лев';
-    if (level < 30) return 'Тигр';
-    return 'Дракон';
-  };
-
-  const getMoodEmoji = (mood: string): string => {
-    const moods: { [key: string]: string } = {
-      happy: '😊 Довольный',
-      excited: '🤩 Воодушевлён', 
-      sleepy: '😴 Отдыхает',
-      hungry: '😋 Хочет вкусненького',
-      playful: '😸 Игривый'
-    };
-    return moods[mood] || '😊 Довольный';
-  };
-
-  // Смена настроения каждые 30 секунд
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const moods = ['happy', 'excited', 'sleepy', 'hungry', 'playful'];
-      const randomMood = moods[Math.floor(Math.random() * moods.length)];
-      setMood(randomMood);
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleInteraction = () => {
-    setLastInteraction(Date.now());
-    setMood('excited');
+    transform: scale(1.12);
+    box-shadow: 0 12px 35px ${tokens.color.shadow}, 0 0 0 2px ${({ theme }) => theme.color.pet.accent}60;
     
-    // Через 3 секунды вернуться к случайному настроению
-    setTimeout(() => {
-      const moods = ['happy', 'playful'];
-      const randomMood = moods[Math.floor(Math.random() * moods.length)];
-      setMood(randomMood);
-    }, 3000);
-  };
+    &::before {
+      opacity: 1;
+    }
+  }
 
-  const getHappiness = (): number => {
-    const timeSinceLastInteraction = Date.now() - lastInteraction;
-    const hoursWithoutInteraction = timeSinceLastInteraction / (1000 * 60 * 60);
-    return Math.max(0, 100 - hoursWithoutInteraction * 10);
-  };
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color.pet.accent};
+    outline-offset: 2px;
+  }
+`
+
+const Bubble = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !prop.startsWith('$')
+})`
+  position: absolute;
+  bottom: 85px;
+  right: -10px;
+  background: ${({ theme }) => theme.color.surface};
+  border: 2px solid ${({ theme }) => theme.color.pet.accent};
+  border-radius: ${tokens.radius.card};
+  padding: 12px 16px;
+  max-width: 200px;
+  min-width: 120px;
+  box-shadow: 0 8px 25px ${tokens.color.shadow};
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+
+  /* Ensure bubble doesn't go off screen */
+  @media (max-width: 480px) {
+    max-width: 160px;
+    padding: 10px 14px;
+    right: -15px;
+    bottom: 80px;
+  }
+
+  /* Left-handed adaptation */
+  :root[data-left-handed="true"] & {
+    right: auto;
+    left: -10px;
+
+    &::after {
+      right: auto;
+      left: 25px;
+    }
+
+    &::before {
+      right: auto;
+      left: 25px;
+    }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 25px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid ${({ theme }) => theme.color.surface};
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    right: 25px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid ${({ theme }) => theme.color.pet.accent};
+  }
+`
+
+const BubbleText = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.text};
+  line-height: 1.4;
+  text-align: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+
+  /* Mobile adaptation */
+  @media (max-width: 480px) {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+`
+
+
+// Warm messages system
+const warmMessages = {
+  greeting: [
+    "привет, друг! 🌿",
+    "как дела? я здесь",
+    "ты не один, я рядом",
+    "всё хорошо, просто дыши",
+  ],
+  encouragement: [
+    "ты делаешь достаточно",
+    "маленькие шаги — это тоже победа",
+    "мне хорошо рядом с тобой",
+    "ты заботишься о себе — это важно",
+  ],
+  celebration: [
+    "мне приятно за тебя! 💚",
+    "ты молодец!",
+    "как же я рад! ✨",
+    "это было прекрасно",
+  ],
+  comfort: [
+    "всё в порядке, просто будь здесь",
+    "не нужно быть идеальным",
+    "я рядом, когда тебе нужно",
+    "сегодня не нужно быть продуктивным",
+  ],
+}
+
+interface PetProps {
+  showVictoryBubble?: boolean
+  onVictoryBubbleShown?: () => void
+  petMood?: 'happy' | 'sleepy' | 'excited' | 'calm'
+}
+
+const PetComponent: React.FC<PetProps> = ({
+  showVictoryBubble = false,
+  onVictoryBubbleShown,
+  petMood = 'happy',
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [showBubble, setShowBubble] = useState(false)
+  const [bubbleText, setBubbleText] = useState('')
+  const [petEmoji, setPetEmoji] = useState('🐾')
+
+  // Pet emoji based on mood
+  const petEmojis = React.useMemo(() => ({
+    happy: '🐾',
+    sleepy: '😴',
+    excited: '✨',
+    calm: '🌿',
+  }), [])
+
+  useEffect(() => {
+    setPetEmoji(petEmojis[petMood])
+  }, [petMood, petEmojis])
+
+  useEffect(() => {
+    if (showVictoryBubble) {
+      const celebrationMessage = warmMessages.celebration[
+        Math.floor(Math.random() * warmMessages.celebration.length)
+      ]
+      setBubbleText(celebrationMessage)
+      setShowBubble(true)
+      onVictoryBubbleShown?.()
+
+      // Hide bubble after 4 seconds
+      const timer = setTimeout(() => {
+        setShowBubble(false)
+      }, 4000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [showVictoryBubble, onVictoryBubbleShown])
+
+  const handlePetClick = () => {
+    hapticLight()
+    playPetInteraction()
+    
+    // Random warm message
+    const messages = [
+      ...warmMessages.greeting,
+      ...warmMessages.encouragement,
+      ...warmMessages.comfort,
+    ]
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)]
+    
+    setBubbleText(randomMessage)
+    setShowBubble(true)
+
+    // Hide bubble after 3 seconds
+    setTimeout(() => {
+      setShowBubble(false)
+    }, 3000)
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+  }
 
   return (
-    <PetContainer className="fade-in">
-      <LevelBadge>LVL {level}</LevelBadge>
-      
-      <PetHeader>🏠 Ваш питомец</PetHeader>
-      
-      <PetAvatar 
-        level={level}
-        onClick={handleInteraction}
-        title="Кликните, чтобы погладить питомца!"
+    <PetContainer>
+      <PetButton
+        onClick={handlePetClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        animate={{
+          y: isHovered ? [-3, 3, -3] : [-2, 2, -2],
+          rotate: isHovered ? [-2, 2, -2] : 0,
+        }}
+        whileHover={{ 
+          scale: 1.12,
+          rotate: [0, -8, 8, 0],
+        }}
+        whileTap={{ 
+          scale: 0.92,
+          rotate: [0, -15, 15, 0],
+        }}
+        transition={{ 
+          duration: 0.1, 
+          ease: 'easeOut',
+          // For floating animation
+          rotate: {
+            duration: 4,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }
+        }}
+        aria-label="Погладить питомца"
       >
-        {getPetEmoji(level)}
-      </PetAvatar>
+        <motion.span
+          animate={{
+            scale: showVictoryBubble ? [1, 1.2, 1] : 1,
+          }}
+          transition={{
+            duration: 0.6,
+            ease: 'easeInOut',
+          }}
+        >
+          {petEmoji}
+        </motion.span>
+      </PetButton>
       
-      <h3 style={{ margin: '0.5rem 0', fontSize: '1.2rem' }}>
-        {getPetName(level)}
-      </h3>
-      
-      <MoodIndicator mood={mood}>
-        {getMoodEmoji(mood)}
-      </MoodIndicator>
-      
-      <PetStats>
-        <StatRow>
-          <StatLabel>Уровень</StatLabel>
-          <StatValue>{level}</StatValue>
-        </StatRow>
-        
-        <StatRow>
-          <StatLabel>Счастье</StatLabel>
-          <StatValue>{Math.round(getHappiness())}%</StatValue>
-        </StatRow>
-        
-        <StatRow>
-          <StatLabel>Эволюция</StatLabel>
-          <StatValue>
-            {level < 5 ? 'Котёнок' : 
-             level < 10 ? 'Кот' : 
-             level < 20 ? 'Лев' : 
-             level < 30 ? 'Тигр' : 'Дракон'}
-          </StatValue>
-        </StatRow>
-      </PetStats>
-      
-      <InteractionButton onClick={handleInteraction}>
-        💖 Погладить питомца
-      </InteractionButton>
-    </PetContainer>
-  );
-};
 
-export default Pet;
+      <AnimatePresence>
+        {showBubble && (
+          <Bubble
+            initial={{ opacity: 0, scale: 0.7, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.7, y: 20 }}
+            transition={{ 
+              duration: 0.4, 
+              ease: 'easeOut',
+              type: 'spring',
+              stiffness: 200,
+              damping: 20,
+            }}
+            role="alert"
+            aria-live="polite"
+          >
+            <BubbleText>{bubbleText}</BubbleText>
+          </Bubble>
+        )}
+      </AnimatePresence>
+    </PetContainer>
+  )
+}
+
+export const Pet = React.memo(PetComponent)
+
+

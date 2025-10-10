@@ -1,0 +1,204 @@
+/* Attention & Reach Zones - Global CSS Variables and Utilities */
+
+:root {
+  /* Core reach zone tokens */
+  --tap-min: 48px;
+  --edge-safe: 16px;
+  --gap-xs: 8px;
+  --gap-sm: 12px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --layer-bottom-elev: 12;
+  --radius-lg: 16px;
+  --anim-fast: 200ms;
+  --anim-base: 280ms;
+  --anim-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --grip-area: 24px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --anim-fast: 0ms;
+    --anim-base: 0ms;
+  }
+}
+
+/* Safe area utilities */
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0) + var(--edge-safe));
+}
+
+.safe-top {
+  padding-top: calc(env(safe-area-inset-top, 0) + var(--edge-safe));
+}
+
+.safe-left {
+  padding-left: calc(env(safe-area-inset-left, 0) + var(--edge-safe));
+}
+
+.safe-right {
+  padding-right: calc(env(safe-area-inset-right, 0) + var(--edge-safe));
+}
+
+/* Three-zone screen layout */
+.screen {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Bottom action zone */
+.action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--layer-bottom-elev);
+  padding: var(--gap-md);
+  padding-bottom: calc(var(--gap-md) + env(safe-area-inset-bottom, 0));
+  background: color-mix(in oklab, var(--surface, #ffffff), transparent 10%);
+  backdrop-filter: blur(6px);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  border-top: 1px solid var(--border, #e5e5e5);
+}
+
+/* Primary CTA button */
+.cta {
+  min-height: var(--tap-min);
+  width: 100%;
+  border-radius: calc(var(--radius-lg) + 4px);
+  font-weight: 600;
+  font-size: 16px;
+  padding: var(--gap-md) var(--gap-lg);
+  border: none;
+  cursor: pointer;
+  transition: all var(--anim-fast) var(--anim-ease);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--accent, #007AFF);
+  outline-offset: 2px;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  right: clamp(16px, 6vw, 28px);
+  bottom: calc(72px + env(safe-area-inset-bottom, 0));
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border-radius: 999px;
+  z-index: calc(var(--layer-bottom-elev) + 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: none;
+  cursor: pointer;
+  transition: all var(--anim-fast) var(--anim-ease);
+}
+
+.fab:focus-visible {
+  outline: 2px solid var(--accent, #007AFF);
+  outline-offset: 2px;
+}
+
+/* Left-handed support */
+:root[data-left-handed="true"] .fab {
+  right: auto;
+  left: clamp(16px, 6vw, 28px);
+}
+
+/* Tile cards with inner CTA */
+.tile {
+  min-height: 92px;
+  border-radius: var(--radius-lg);
+  padding: var(--gap-md);
+  display: grid;
+  align-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all var(--anim-fast) var(--anim-ease);
+}
+
+.tile .tile-cta {
+  margin-top: var(--gap-sm);
+  align-self: end;
+  min-height: var(--tap-min);
+  border-radius: var(--radius-lg);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--anim-fast) var(--anim-ease);
+}
+
+.tile .tile-cta:focus-visible {
+  outline: 2px solid var(--accent, #007AFF);
+  outline-offset: 2px;
+}
+
+/* Tab bar improvements */
+.tab-bar {
+  height: calc(var(--tab-bar-height, 56px) + env(safe-area-inset-bottom, 0));
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  z-index: var(--layer-bottom-elev);
+}
+
+.tab-button {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding: var(--gap-xs);
+  border-radius: var(--radius-lg);
+  transition: all var(--anim-fast) var(--anim-ease);
+}
+
+.tab-button:focus-visible {
+  outline: 2px solid var(--accent, #007AFF);
+  outline-offset: 2px;
+}
+
+/* Grip area for gestures */
+.grip-area {
+  height: var(--grip-area);
+  position: relative;
+}
+
+.grip-area::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 4px;
+  background: var(--border, #e5e5e5);
+  border-radius: 2px;
+}
+
+/* Focus management */
+.focus-trap {
+  outline: none;
+}
+
+.focus-trap:focus-visible {
+  outline: 2px solid var(--accent, #007AFF);
+  outline-offset: 2px;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .cta,
+  .fab,
+  .tab-button {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .action-bar {
+    border-top: 2px solid var(--text, #000000);
+  }
+  
+  .fab {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}

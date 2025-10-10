@@ -1,363 +1,450 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useTheme } from '../ThemeContext';
-import { UserStats } from '../types';
-import { getMotivationalMessage } from '../utils/taskSuggestions';
-
-interface ProfileSectionProps {
-  stats: UserStats;
-  expProgress: number;
-  expForNextLevel: number;
-  onResetData: () => void;
-}
+import React, { useState, useEffect } from 'react'
+import styled from 'styled-components'
+import { motion, AnimatePresence } from 'framer-motion'
+import { tokens } from '../design/tokens'
+import { useTheme } from '../ThemeContext'
 
 const ProfileContainer = styled.div`
-  padding: 1rem 0 5rem 0; /* Отступ снизу для навигации */
-  max-width: 100%;
-`;
+  padding: 16px;
+  padding-bottom: calc(16px + 56px + env(safe-area-inset-bottom, 0));
+  background: ${({ theme }) => theme.color.surface};
+  border-radius: ${tokens.radius.card};
+  margin: 16px;
+  border: 1px solid ${({ theme }) => theme.color.border};
+`
 
-const ProfileCard = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  box-shadow: ${({ theme }) => theme.shadows.medium};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: ${({ theme }) => theme.gradients.primary};
-  }
-`;
-
-const Avatar = styled.div`
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.1));
-`;
-
-const UserName = styled.h2`
-  margin: 0 0 0.5rem 0;
-  color: ${({ theme }) => theme.colors.text};
-  font-size: 1.5rem;
-  font-weight: 700;
-`;
-
-const UserLevel = styled.div`
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: ${({ theme }) => theme.gradients.secondary};
-  color: white;
-  border-radius: ${({ theme }) => theme.borderRadius.large};
-  font-size: 0.9rem;
+const ProfileTitle = styled.h2`
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 1rem;
-`;
+  color: ${({ theme }) => theme.color.text};
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+`
 
-const MotivationalQuote = styled.div`
-  font-size: 1rem;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-style: italic;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: ${({ theme }) => theme.colors.primary}08;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  border-left: 4px solid ${({ theme }) => theme.colors.primary};
-`;
+const Section = styled.div`
+  margin-bottom: 24px;
 
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-`;
-
-const StatCard = styled.div`
-  background: ${({ theme }) => theme.gradients.card};
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 1rem;
-  text-align: center;
-`;
-
-const StatValue = styled.div`
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary};
-  margin-bottom: 0.25rem;
-`;
-
-const StatLabel = styled.div`
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 500;
-`;
-
-const ProgressSection = styled.div`
-  margin-bottom: 1.5rem;
-`;
-
-const ProgressLabel = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: ${({ theme }) => theme.colors.text};
-  font-weight: 500;
-`;
-
-const ProgressBar = styled.div`
-  width: 100%;
-  height: 12px;
-  background: ${({ theme }) => theme.colors.border};
-  border-radius: 6px;
-  overflow: hidden;
-  position: relative;
-`;
-
-const ProgressFill = styled.div<{ progress: number }>`
-  width: ${props => props.progress}%;
-  height: 100%;
-  background: ${({ theme }) => theme.gradients.secondary};
-  border-radius: 6px;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: shimmer 2s infinite;
+  &:last-child {
+    margin-bottom: 0;
   }
-  
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-`;
-
-const ThemeSection = styled.div`
-  margin-bottom: 1.5rem;
-`;
+`
 
 const SectionTitle = styled.h3`
-  margin: 0 0 1rem 0;
-  color: ${({ theme }) => theme.colors.text};
-  font-size: 1.1rem;
+  font-size: 16px;
   font-weight: 600;
-`;
+  color: ${({ theme }) => theme.color.text};
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+`
 
-const ThemeGrid = styled.div`
+const ThemesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-`;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 12px;
+`
 
-const ThemeCard = styled.button<{ isActive: boolean }>`
+const ThemePreview = styled.button<{ $isActive: boolean }>`
+  aspect-ratio: 3/2;
+  border-radius: ${tokens.radius.card};
+  border: 2px solid ${({ $isActive, theme }) => 
+    $isActive ? theme.color.accent : theme.color.border};
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color.accent};
+    outline-offset: 2px;
+  }
+`
+
+const ThemeColors = styled.div<{ $theme: string }>`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  ${({ $theme }) => {
+    switch ($theme) {
+      case 'light':
+        return `
+          background: linear-gradient(135deg, #F7F7FB 0%, #FFFFFF 100%);
+        `
+      case 'dark':
+        return `
+          background: linear-gradient(135deg, #0F1419 0%, #1A2230 100%);
+        `
+      case 'ocean':
+        return `
+          background: linear-gradient(135deg, #F0F9FF 0%, #0284C7 100%);
+        `
+      case 'forest':
+        return `
+          background: linear-gradient(135deg, #F0FDF4 0%, #16A34A 100%);
+        `
+      default:
+        return `
+          background: linear-gradient(135deg, #F7F7FB 0%, #FFFFFF 100%);
+        `
+    }
+  }}
+`
+
+const ThemeName = styled.div`
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  padding: 2px 4px;
+  border-radius: 4px;
+`
+
+const CheckIcon = styled.div<{ $isActive: boolean }>`
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: ${({ $isActive, theme }) => 
+    $isActive ? theme.color.accent : 'transparent'};
+  border: 2px solid ${({ $isActive, theme }) => 
+    $isActive ? theme.color.accent : theme.color.border};
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: ${({ isActive, theme }) => 
-    isActive ? theme.colors.primary + '15' : theme.colors.background
-  };
-  border: 2px solid ${({ isActive, theme }) => 
-    isActive ? theme.colors.primary : theme.colors.border
-  };
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  justify-content: center;
+  font-size: 10px;
+  color: white;
+  opacity: ${({ $isActive }) => $isActive ? 1 : 0};
+  transition: all 0.2s ease;
+`
+
+const ButtonGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`
+
+const Button = styled.button<{ $variant: 'primary' | 'secondary' | 'danger' }>`
+  height: ${tokens.size.tap};
+  border-radius: ${tokens.radius.button};
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
-  
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.primary};
-    background: ${({ theme }) => theme.colors.primary}08;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  ${({ $variant, theme }) => {
+    switch ($variant) {
+      case 'primary':
+        return `
+          background: ${theme.color.accent};
+          color: white;
+          
+          &:hover {
+            opacity: 0.9;
+          }
+          
+          &:active {
+            transform: scale(0.98);
+          }
+        `
+      case 'secondary':
+        return `
+          background: ${theme.color.surface};
+          color: ${theme.color.textMuted};
+          border: 1px solid ${theme.color.border};
+          
+          &:hover {
+            background: ${theme.color.bg};
+          }
+          
+          &:active {
+            transform: scale(0.98);
+          }
+        `
+      case 'danger':
+        return `
+          background: #DC2626;
+          color: white;
+          border: 2px solid #B91C1C;
+          font-weight: 600;
+          position: relative;
+          overflow: hidden;
+          
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+          }
+          
+          &:hover {
+            background: #B91C1C;
+            border-color: #991B1B;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            
+            &::before {
+              left: 100%;
+            }
+          }
+          
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+          }
+          
+          &:disabled {
+            background: #9CA3AF;
+            border-color: #6B7280;
+            color: #D1D5DB;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            
+            &:hover {
+              background: #9CA3AF;
+              border-color: #6B7280;
+              transform: none;
+              box-shadow: none;
+            }
+          }
+        `
+    }
+  }}
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color.accent};
+    outline-offset: 2px;
   }
-`;
-
-const ThemePreview = styled.div<{ themeColor: string }>`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: ${props => props.themeColor};
-  flex-shrink: 0;
-`;
-
-const ThemeName = styled.span`
-  font-size: 0.9rem;
-  color: ${({ theme }) => theme.colors.text};
-  font-weight: 500;
-`;
+`
 
 const DangerZone = styled.div`
-  margin-top: 2rem;
-  padding: 1rem;
-  background: ${({ theme }) => theme.colors.error}08;
-  border: 1px solid ${({ theme }) => theme.colors.error}20;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-`;
+  background: ${({ theme }) => theme.color.bg};
+  border: 1px solid #EF4444;
+  border-radius: ${tokens.radius.card};
+  padding: 16px;
+  margin-top: 16px;
+`
 
-const DangerButton = styled.button`
-  width: 100%;
-  padding: 0.75rem;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.error};
-  border: 1px solid ${({ theme }) => theme.colors.error}40;
-  border-radius: ${({ theme }) => theme.borderRadius.small};
-  font-size: 0.85rem;
+const DangerTitle = styled.h4`
+  font-size: 14px;
+  font-weight: 600;
+  color: #EF4444;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+`
+
+const DangerText = styled.p`
+  font-size: 12px;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: ${({ theme }) => theme.colors.error}15;
-    border-color: ${({ theme }) => theme.colors.error};
+  color: ${({ theme }) => theme.color.textMuted};
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+`
+
+const ConfirmInput = styled.input`
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #EF4444;
+  border-radius: ${tokens.radius.button};
+  font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.text};
+  background: ${({ theme }) => theme.color.surface};
+  margin-bottom: 12px;
+
+  &:focus {
+    border-color: #EF4444;
+    outline: none;
   }
-`;
 
-const themeColors = {
-  light: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-  dark: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-  ocean: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
-  forest: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-};
+  &:focus-visible {
+    outline: 2px solid #EF4444;
+    outline-offset: 2px;
+  }
+`
 
-const themeNames = {
-  light: 'Светлая',
-  dark: 'Тёмная', 
-  ocean: 'Океан',
-  forest: 'Лес',
-};
+const themes = [
+  { id: 'light', name: 'Светлая' },
+  { id: 'dark', name: 'Тёмная' },
+  { id: 'ocean', name: 'Океан' },
+  { id: 'forest', name: 'Лес' },
+]
 
-const ProfileSection: React.FC<ProfileSectionProps> = ({ 
-  stats, 
-  expProgress, 
-  expForNextLevel,
-  onResetData 
+interface ProfileSectionProps {
+  onExportData: () => void
+  onImportData: (data: string) => void
+  onResetAll: () => void
+}
+
+export const ProfileSection: React.FC<ProfileSectionProps> = ({
+  onExportData,
+  onImportData,
+  onResetAll,
 }) => {
-  const { themeName, setTheme, availableThemes } = useTheme();
-  const [motivationalText] = useState(() => getMotivationalMessage('evening'));
+  const { themeName, setTheme } = useTheme()
+  const [showDangerZone, setShowDangerZone] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+  const [importData, setImportData] = useState('')
+  const [resetAttempts, setResetAttempts] = useState(0)
+  const [blockUntil, setBlockUntil] = useState<number | null>(null)
 
-  const handleResetWithConfirmation = () => {
-    if (window.confirm('⚠️ Это удалит все данные навсегда. Вы точно уверены?')) {
-      if (window.confirm('🤔 Последний шанс передумать! Данные восстановить будет невозможно.')) {
-        onResetData();
+  const handleThemeChange = (themeId: string) => {
+    setTheme(themeId as 'light' | 'dark' | 'auto')
+  }
+
+  const handleExport = () => {
+    onExportData()
+  }
+
+  const handleImport = () => {
+    if (importData.trim()) {
+      onImportData(importData)
+      setImportData('')
+    }
+  }
+
+  const handleReset = () => {
+    if (confirmText === 'СБРОС') {
+      onResetAll()
+      setConfirmText('')
+      setShowDangerZone(false)
+      setResetAttempts(0)
+      setBlockUntil(null)
+    } else {
+      const newAttempts = resetAttempts + 1
+      setResetAttempts(newAttempts)
+      
+      if (newAttempts >= 3) {
+        // Block for 5 minutes
+        setBlockUntil(Date.now() + 5 * 60 * 1000)
       }
     }
-  };
+  }
 
-  const getUserAvatar = (level: number): string => {
-    if (level < 5) return '🌱';
-    if (level < 10) return '🌸'; 
-    if (level < 20) return '🌟';
-    if (level < 30) return '💫';
-    return '✨';
-  };
+  const canReset = confirmText === 'СБРОС'
+  const isBlocked = blockUntil ? Date.now() < blockUntil : resetAttempts >= 3
+  const timeLeft = blockUntil ? Math.max(0, Math.ceil((blockUntil - Date.now()) / 1000)) : 0
 
-  const getUserTitle = (level: number): string => {
-    if (level < 5) return 'Новичок';
-    if (level < 10) return 'Организатор';
-    if (level < 20) return 'Мастер дел';
-    if (level < 30) return 'Гуру продуктивности';
-    return 'Легенда Gropy';
-  };
+  // Update timer every second when blocked
+  useEffect(() => {
+    if (blockUntil && timeLeft > 0) {
+      const timer = setInterval(() => {
+        if (Date.now() >= blockUntil) {
+          setBlockUntil(null)
+          setResetAttempts(0)
+        }
+      }, 1000)
+      
+      return () => clearInterval(timer)
+    }
+  }, [blockUntil, timeLeft])
 
   return (
     <ProfileContainer>
-      <ProfileCard>
-        <Avatar>{getUserAvatar(stats.level)}</Avatar>
-        <UserName>{getUserTitle(stats.level)}</UserName>
-        <UserLevel>Уровень {stats.level}</UserLevel>
-        
-        <MotivationalQuote>
-          "{motivationalText}"
-        </MotivationalQuote>
-        
-        <ProgressSection>
-          <ProgressLabel>
-            <span>Прогресс до следующего уровня</span>
-            <span>{stats.experience} / {expForNextLevel}</span>
-          </ProgressLabel>
-          <ProgressBar>
-            <ProgressFill progress={expProgress} />
-          </ProgressBar>
-        </ProgressSection>
-        
-        <StatsGrid>
-          <StatCard>
-            <StatValue>{stats.totalPoints}</StatValue>
-            <StatLabel>Очков заработано</StatLabel>
-          </StatCard>
-          
-          <StatCard>
-            <StatValue>{stats.completedTasks}</StatValue>
-            <StatLabel>Задач выполнено</StatLabel>
-          </StatCard>
-          
-          <StatCard>
-            <StatValue>{stats.streak}</StatValue>
-            <StatLabel>Дней подряд</StatLabel>
-          </StatCard>
-          
-          <StatCard>
-            <StatValue>{Math.round((stats.completedTasks / Math.max(stats.totalTasks, 1)) * 100)}%</StatValue>
-            <StatLabel>Процент выполнения</StatLabel>
-          </StatCard>
-        </StatsGrid>
-      </ProfileCard>
-      
-      <ProfileCard>
-        <SectionTitle>🎨 Темы оформления</SectionTitle>
-        <ThemeGrid>
-          {availableThemes.map(theme => (
-            <ThemeCard
-              key={theme}
-              isActive={themeName === theme}
-              onClick={() => setTheme(theme)}
-            >
-              <ThemePreview themeColor={themeColors[theme as keyof typeof themeColors]} />
-              <ThemeName>{themeNames[theme as keyof typeof themeNames]}</ThemeName>
-            </ThemeCard>
-          ))}
-        </ThemeGrid>
-      </ProfileCard>
-      
-      <ProfileCard>
-        <DangerZone>
-          <SectionTitle style={{ color: 'inherit', marginBottom: '0.5rem' }}>
-            ⚠️ Опасная зона
-          </SectionTitle>
-          <p style={{ 
-            fontSize: '0.8rem', 
-            color: 'inherit', 
-            margin: '0 0 1rem 0',
-            opacity: 0.8 
-          }}>
-            Это действие удалит все ваши данные навсегда
-          </p>
-          <DangerButton onClick={handleResetWithConfirmation}>
-            🗑️ Сбросить все данные
-          </DangerButton>
-        </DangerZone>
-      </ProfileCard>
-    </ProfileContainer>
-  );
-};
+      <ProfileTitle>Профиль</ProfileTitle>
 
-export default ProfileSection;
+      <Section>
+        <SectionTitle>Тема оформления</SectionTitle>
+        <ThemesGrid>
+          {themes.map(theme => (
+            <ThemePreview
+              key={theme.id}
+              $isActive={themeName === theme.id}
+              onClick={() => handleThemeChange(theme.id)}
+            >
+              <ThemeColors $theme={theme.id} />
+              <ThemeName>{theme.name}</ThemeName>
+              <CheckIcon $isActive={themeName === theme.id}>✓</CheckIcon>
+            </ThemePreview>
+          ))}
+        </ThemesGrid>
+      </Section>
+
+      <Section>
+        <SectionTitle>Данные</SectionTitle>
+        <ButtonGroup>
+          <Button $variant="primary" onClick={handleExport}>
+            📤 Экспорт данных
+          </Button>
+          <Button $variant="secondary" onClick={handleImport}>
+            📥 Импорт данных
+          </Button>
+        </ButtonGroup>
+      </Section>
+
+      <DangerZone>
+        <DangerTitle>Опасная зона</DangerTitle>
+        <DangerText>
+          Сброс всех данных. Это действие нельзя отменить.
+        </DangerText>
+        
+        <AnimatePresence>
+          {showDangerZone ? (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ConfirmInput
+                type="text"
+                placeholder="Введите СБРОС для подтверждения"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                disabled={isBlocked}
+              />
+              {resetAttempts > 0 && resetAttempts < 3 && (
+                <DangerText style={{ fontSize: '12px', marginTop: '8px' }}>
+                  Неверный ввод. Попыток: {resetAttempts}/3
+                </DangerText>
+              )}
+              {isBlocked && (
+                <DangerText style={{ fontSize: '12px', marginTop: '8px' }}>
+                  {timeLeft > 0 
+                    ? `Слишком много попыток. Попробуйте через ${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`
+                    : 'Слишком много попыток. Попробуйте позже.'
+                  }
+                </DangerText>
+              )}
+              <Button
+                $variant="danger"
+                onClick={handleReset}
+                disabled={!canReset || isBlocked}
+              >
+                {isBlocked ? 'Заблокировано' : 'Сбросить всё'}
+              </Button>
+            </motion.div>
+          ) : (
+            <Button
+              $variant="danger"
+              onClick={() => setShowDangerZone(true)}
+              disabled={isBlocked}
+            >
+              {isBlocked ? 'Заблокировано' : 'Сбросить всё'}
+            </Button>
+          )}
+        </AnimatePresence>
+      </DangerZone>
+    </ProfileContainer>
+  )
+}

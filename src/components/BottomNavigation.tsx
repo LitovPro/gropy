@@ -1,196 +1,149 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
+import { motion } from 'framer-motion'
+import { tokens } from '../design/tokens'
 
-export type NavTab = 'home' | 'shop' | 'pet' | 'profile';
-
-interface BottomNavigationProps {
-  activeTab: NavTab;
-  onTabChange: (tab: NavTab) => void;
-  pendingTasks: number;
-  userPoints: number;
-  level: number;
-}
-
-const NavContainer = styled.div`
+const NavigationContainer = styled.div`
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  background: ${({ theme }) => theme.colors.surface}f8;
-  backdrop-filter: blur(20px);
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 0.5rem 0 max(0.5rem, env(safe-area-inset-bottom));
-  
-  /* Для iPhone X и новее */
-  @supports (padding: max(0px)) {
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-  }
-`;
-
-const NavContent = styled.div`
+  background: ${({ theme }) => theme.color.surface};
+  border-top: 1px solid ${({ theme }) => theme.color.border};
+  padding: ${tokens.space.sm} ${tokens.space.md};
+  padding-bottom: max(${tokens.space.sm}, env(safe-area-inset-bottom));
+  z-index: ${tokens.zones.layerBottomElev};
   display: flex;
   justify-content: space-around;
   align-items: center;
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 0 1rem;
-`;
+  box-shadow: 0 -4px 20px ${tokens.color.shadow};
+  min-height: calc(56px + env(safe-area-inset-bottom, 0));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+`
 
-const NavButton = styled.button<{ isActive: boolean }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  background: none;
-  border: none;
+const NavButton = styled.button<{ $isActive: boolean }>`
+  display: grid;
+  place-items: center;
+  background: ${({ $isActive, theme }) => 
+    $isActive ? theme.color.pet.accent + '15' : 'none'};
+  border: ${({ $isActive, theme }) => 
+    $isActive ? `2px solid ${theme.color.pet.primary}` : '2px solid transparent'};
   cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0.5rem;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  min-width: 60px;
+  padding: ${tokens.space.sm};
+  border-radius: ${tokens.radius.button};
+  transition: all ${tokens.motion.base} ${tokens.motion.easing};
+  min-width: 48px;
+  min-height: 48px;
   position: relative;
-  
-  ${({ isActive, theme }) => isActive && `
-    background: ${theme.colors.primary}15;
-    transform: translateY(-2px);
-  `}
-  
-  &:active {
-    transform: ${({ isActive }) => isActive ? 'translateY(-1px)' : 'translateY(1px)'};
+  box-shadow: ${({ $isActive, theme }) => 
+    $isActive ? `0 2px 8px ${theme.color.pet.primary}30` : 'none'};
+  /* Улучшенное центрирование для эмодзи */
+  line-height: 1;
+
+  &:hover {
+    background: ${({ $isActive, theme }) => 
+      $isActive ? theme.color.pet.accent + '20' : theme.color.pet.accent + '10'};
+    border-color: ${({ $isActive, theme }) => 
+      $isActive ? theme.color.pet.primary : theme.color.pet.accent + '50'};
   }
-`;
 
-const NavIcon = styled.div<{ isActive: boolean }>`
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
-  filter: ${({ isActive }) => isActive ? 'none' : 'grayscale(0.3)'};
-  transform: ${({ isActive }) => isActive ? 'scale(1.1)' : 'scale(1)'};
-`;
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color.pet.accent};
+    outline-offset: 2px;
+  }
+`
 
-const NavLabel = styled.span<{ isActive: boolean }>`
-  font-size: 0.7rem;
-  font-weight: ${({ isActive }) => isActive ? '600' : '500'};
-  color: ${({ isActive, theme }) => 
-    isActive ? theme.colors.primary : theme.colors.textSecondary
-  };
-  transition: all 0.3s ease;
-`;
+const NavIcon = styled.div<{ $isActive: boolean }>`
+  font-size: ${({ $isActive }) => $isActive ? '30px' : '28px'};
+  line-height: 1;
+  color: ${({ $isActive, theme }) => 
+    $isActive ? theme.color.pet.primary : theme.color.textMuted};
+  transition: all ${tokens.motion.base} ${tokens.motion.easing};
+  transform: ${({ $isActive }) => $isActive ? 'scale(1.1) translateY(-0.5px)' : 'translateY(-0.5px)'};
+  filter: ${({ $isActive }) => $isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' : 'none'};
+  /* Оптимизированное центрирование для эмодзи */
+  text-align: center;
+  display: block;
+`
 
-const Badge = styled.div`
+// const NavLabel = styled.div<{ $isActive: boolean }>`
+//   font-size: 11px;
+//   font-weight: ${tokens.typography.fontWeight.medium};
+//   color: ${({ $isActive, theme }) => 
+//     $isActive ? theme.color.pet.primary : theme.color.textMuted};
+//   line-height: 1.2;
+//   font-family: ${tokens.typography.fontFamily.primary};
+//   transition: all ${tokens.motion.base} ${tokens.motion.easing};
+//   text-align: center;
+//   white-space: nowrap;
+// `
+
+const Badge = styled(motion.div)`
   position: absolute;
-  top: 0.2rem;
-  right: 0.2rem;
-  background: ${({ theme }) => theme.colors.error};
+  top: 4px;
+  right: 4px;
+  background: #EF4444;
   color: white;
-  border-radius: 10px;
-  padding: 0.1rem 0.35rem;
-  font-size: 0.6rem;
+  font-size: 10px;
   font-weight: 700;
   min-width: 16px;
-  text-align: center;
-  line-height: 1.2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-`;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+`
 
-const PulseDot = styled.div`
-  position: absolute;
-  top: 0.3rem;
-  right: 0.3rem;
-  width: 8px;
-  height: 8px;
-  background: ${({ theme }) => theme.colors.success};
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 ${({ theme }) => theme.colors.success}66;
-    }
-    70% {
-      box-shadow: 0 0 0 10px ${({ theme }) => theme.colors.success}00;
-    }
-    100% {
-      box-shadow: 0 0 0 0 ${({ theme }) => theme.colors.success}00;
-    }
-  }
-`;
+export type NavItem = {
+  id: string
+  label: string
+  icon: string
+  badge?: number
+}
 
-const BottomNavigation: React.FC<BottomNavigationProps> = ({ 
-  activeTab, 
-  onTabChange, 
-  pendingTasks,
-  userPoints,
-  level 
+interface BottomNavigationProps {
+  items: NavItem[]
+  activeItem: string
+  onItemClick: (itemId: string) => void
+}
+
+export const BottomNavigation: React.FC<BottomNavigationProps> = ({
+  items,
+  activeItem,
+  onItemClick,
 }) => {
-  const getTabInfo = (tab: NavTab) => {
-    switch (tab) {
-      case 'home':
-        return {
-          icon: '🏠',
-          label: 'Дела',
-          badge: pendingTasks > 0 ? pendingTasks : null,
-          showPulse: false
-        };
-      case 'shop':
-        return {
-          icon: '🏪',
-          label: 'Магазин', 
-          badge: userPoints >= 15 ? '!' : null, // Показываем, если можно что-то купить
-          showPulse: false
-        };
-      case 'pet':
-        return {
-          icon: level >= 20 ? '🦁' : level >= 10 ? '🐈' : '🐱',
-          label: 'Питомец',
-          badge: null,
-          showPulse: level > 1 // Показываем активность если питомец развивается
-        };
-      case 'profile':
-        return {
-          icon: '👤',
-          label: 'Профиль',
-          badge: null,
-          showPulse: false
-        };
-      default:
-        return { icon: '❓', label: 'Unknown', badge: null, showPulse: false };
-    }
-  };
-
   return (
-    <NavContainer>
-      <NavContent>
-        {(['home', 'shop', 'pet', 'profile'] as NavTab[]).map(tab => {
-          const tabInfo = getTabInfo(tab);
-          const isActive = activeTab === tab;
-          
-          return (
-            <NavButton 
-              key={tab}
-              isActive={isActive}
-              onClick={() => onTabChange(tab)}
-            >
-              <NavIcon isActive={isActive}>
-                {tabInfo.icon}
-              </NavIcon>
-              <NavLabel isActive={isActive}>
-                {tabInfo.label}
-              </NavLabel>
-              
-              {tabInfo.badge && (
-                <Badge>{tabInfo.badge}</Badge>
-              )}
-              
-              {tabInfo.showPulse && !isActive && (
-                <PulseDot />
-              )}
-            </NavButton>
-          );
-        })}
-      </NavContent>
-    </NavContainer>
-  );
-};
+    <NavigationContainer>
+      {items.map((item) => (
+        <motion.div
+          key={item.id}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+        >
+          <NavButton
+            $isActive={activeItem === item.id}
+            onClick={() => onItemClick(item.id)}
+            aria-label={item.label}
+          >
+            <NavIcon $isActive={activeItem === item.id}>
+              {item.icon}
+            </NavIcon>
+            {item.badge && item.badge > 0 && (
+              <Badge
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              >
+                {item.badge > 99 ? '99+' : item.badge}
+              </Badge>
+            )}
+          </NavButton>
+        </motion.div>
+      ))}
+    </NavigationContainer>
+  )
+}
 
-export default BottomNavigation;
+

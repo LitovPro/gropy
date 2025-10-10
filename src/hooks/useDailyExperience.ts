@@ -1,114 +1,65 @@
-import { useState, useEffect } from 'react';
-import { useTelegramWebApp } from '../utils/telegram';
-import { safeLocalStorage } from '../utils/security';
+import { useState, useEffect, useCallback } from 'react'
+import { safeGet, safeSet } from '../utils/ls'
+import { hapticSuccess } from '../utils/haptics'
 
-interface DailyExperience {
-  lastVisit: string;
-  isFirstVisitToday: boolean;
-  consecutiveDays: number;
-  quickActions: string[];
-}
-
-const STORAGE_KEY = 'gropy-daily-experience';
+const VISIT_KEY = 'gropy-daily-visit'
+const CELEBRATION_KEY = 'gropy-celebration-count'
 
 export const useDailyExperience = () => {
-  const { hapticFeedback, isAvailable: isTelegram } = useTelegramWebApp();
-  const [dailyExp, setDailyExp] = useState<DailyExperience>(() => {
-    const saved = safeLocalStorage.get(STORAGE_KEY);
-    const today = new Date().toDateString();
-    
-    if (saved) {
-      const isFirstToday = saved.lastVisit !== today;
-      return {
-        ...saved,
-        isFirstVisitToday: isFirstToday,
-        consecutiveDays: isFirstToday ? saved.consecutiveDays + 1 : saved.consecutiveDays
-      };
-    }
-    
-    return {
-      lastVisit: today,
-      isFirstVisitToday: true,
-      consecutiveDays: 1,
-      quickActions: []
-    };
-  });
+  const [isFirstVisitToday, setIsFirstVisitToday] = useState(false)
+  const [isTelegram, setIsTelegram] = useState(false)
 
-  // Сохраняем при изменениях
   useEffect(() => {
-    safeLocalStorage.set(STORAGE_KEY, dailyExp);
-  }, [dailyExp]);
+    // Check if Telegram WebApp
+    const tg = (window as { Telegram?: { WebApp?: unknown } }).Telegram?.WebApp
+    setIsTelegram(!!tg)
 
-  // Обновляем дату посещения
-  const markVisitToday = () => {
-    const today = new Date().toDateString();
-    setDailyExp(prev => ({
-      ...prev,
-      lastVisit: today,
-      isFirstVisitToday: false
-    }));
-  };
+    // Check first visit today
+    const today = new Date().toISOString().split('T')[0]
+    const lastVisit = safeGet<string>(VISIT_KEY, '')
+    const isFirst = lastVisit !== today
 
-  // Добавляем быстрое действие в историю
-  const addQuickAction = (action: string) => {
-    setDailyExp(prev => ({
-      ...prev,
-      quickActions: [action, ...prev.quickActions.slice(0, 4)] // Храним последние 5
-    }));
-  };
-
-  // Haptic feedback для действий
-  const celebrateCompletion = () => {
-    if (isTelegram) {
-      hapticFeedback('success');
+    setIsFirstVisitToday(isFirst)
+    if (isFirst) {
+      safeSet(VISIT_KEY, today)
     }
-  };
+  }, [])
 
-  const feedbackOnAction = () => {
-    if (isTelegram) {
-      hapticFeedback('light');
-    }
-  };
+  const getGreeting = useCallback(() => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Доброе утро! ☀️'
+    if (hour < 18) return 'Добрый день! 🌤️'
+    return 'Добрый вечер! 🌙'
+  }, [])
 
-  const feedbackOnError = () => {
-    if (isTelegram) {
-      hapticFeedback('error');
-    }
-  };
-
-  // Получаем приветствие в зависимости от времени
-  const getGreeting = (): string => {
-    const hour = new Date().getHours();
+  const celebrateCompletion = useCallback(() => {
+    hapticSuccess()
     
-    if (hour < 6) return 'Доброй ночи! 🌙';
-    if (hour < 12) return 'Доброе утро! ☀️';
-    if (hour < 18) return 'Добрый день! 🌤️';
-    return 'Добрый вечер! 🌅';
-  };
+    // Track celebrations to avoid spam
+    const count = safeGet<number>(CELEBRATION_KEY, 0)
+    safeSet(CELEBRATION_KEY, count + 1)
+  }, [])
 
-  // Получаем мотивационное сообщение для первого визита
-  const getWelcomeMessage = (): string => {
-    if (dailyExp.isFirstVisitToday) {
-      if (dailyExp.consecutiveDays === 1) {
-        return 'Добро пожаловать в Gropy! Давайте начнём с малого 🌱';
-      }
-      if (dailyExp.consecutiveDays > 7) {
-        return `Невероятно! Уже ${dailyExp.consecutiveDays} дней с нами! 🔥`;
-      }
-      return `День ${dailyExp.consecutiveDays} с Gropy! Продолжаем расти вместе 💪`;
-    }
-    return 'С возвращением! Что сделаем сегодня? ✨';
-  };
+  const getMotivationalMessage = useCallback(() => {
+    const messages = [
+      'Ты молодец! 💚',
+      'Отличная работа! ✨',
+      'Продолжай в том же духе! 🌟',
+      'Каждый шаг важен! 🎯',
+      'Ты на правильном пути! 🚀',
+    ]
+    return messages[Math.floor(Math.random() * messages.length)]
+  }, [])
 
   return {
-    dailyExp,
-    markVisitToday,
-    addQuickAction,
-    celebrateCompletion,
-    feedbackOnAction,
-    feedbackOnError,
-    getGreeting,
-    getWelcomeMessage,
+    isFirstVisitToday,
     isTelegram,
-  };
-};
+    getGreeting,
+    celebrateCompletion,
+    getMotivationalMessage,
+  }
+}
+
+
+
+
