@@ -145,9 +145,9 @@ export const SuggestionsPager: React.FC<SuggestionsPagerProps> = ({
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSuggestion.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             style={{ gridColumn: '1 / -1' }}
           >

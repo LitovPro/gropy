@@ -7,9 +7,9 @@ import { playButtonClick } from '../utils/sounds'
 const FabContainer = styled(motion.button)<{ $hasActionBar?: boolean }>`
   position: fixed;
   right: clamp(16px, 6vw, 28px);
-  bottom: ${({ $hasActionBar }) => 
-    $hasActionBar 
-      ? 'calc(140px + env(safe-area-inset-bottom, 0))' 
+  bottom: ${({ $hasActionBar }) =>
+    $hasActionBar
+      ? 'calc(140px + env(safe-area-inset-bottom, 0))'
       : 'calc(72px + env(safe-area-inset-bottom, 0))'};
   min-width: ${tokens.size.tapMin};
   min-height: ${tokens.size.tapMin};
@@ -23,7 +23,7 @@ const FabContainer = styled(motion.button)<{ $hasActionBar?: boolean }>`
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  background: ${({ theme }) => 
+  background: ${({ theme }) =>
     `linear-gradient(135deg, ${theme.color.pet.primary}, ${theme.color.warm.medium})`};
   color: white;
 
@@ -50,7 +50,7 @@ const FabContainer = styled(motion.button)<{ $hasActionBar?: boolean }>`
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     transition: none;
-    
+
     &:hover {
       transform: none;
     }
@@ -65,7 +65,7 @@ interface FloatingActionButtonProps {
   className?: string
 }
 
-export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
+export const FloatingActionButton: React.FC<FloatingActionButtonProps> = React.memo(({
   icon,
   onClick,
   hasActionBar = false,
@@ -90,4 +90,6 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
       {icon}
     </FabContainer>
   )
-}
+})
+
+FloatingActionButton.displayName = 'FloatingActionButton'

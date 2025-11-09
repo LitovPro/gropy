@@ -62,8 +62,8 @@ const ToggleSwitch = styled(motion.button)<{ $isOn: boolean }>`
   border: none;
   cursor: pointer;
   position: relative;
-  background: ${({ $isOn, theme }) => 
-    $isOn 
+  background: ${({ $isOn, theme }) =>
+    $isOn
       ? `linear-gradient(135deg, ${theme.color.pet.primary}, ${theme.color.warm.medium})`
       : theme.color.border};
   transition: all ${tokens.motion.fast} ${tokens.motion.easing};
@@ -95,7 +95,7 @@ const ToggleSwitch = styled(motion.button)<{ $isOn: boolean }>`
   }
 `
 
-export const UiSettings: React.FC = () => {
+export const UiSettings: React.FC = React.memo(() => {
   const { prefs, setLeftHanded, setReducedMotion } = useUiPrefs()
 
   const handleLeftHandedToggle = () => {
@@ -111,7 +111,7 @@ export const UiSettings: React.FC = () => {
   return (
     <SettingsContainer>
       <SettingsTitle>Настройки интерфейса</SettingsTitle>
-      
+
       <SettingItem>
         <SettingLabel>
           <SettingTitle>Левша</SettingTitle>
@@ -147,4 +147,6 @@ export const UiSettings: React.FC = () => {
       </SettingItem>
     </SettingsContainer>
   )
-}
+})
+
+UiSettings.displayName = 'UiSettings'

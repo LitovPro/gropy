@@ -11,7 +11,7 @@ export const useRitualSession = () => {
   const [settings, setSettings] = useState<Record<string, RitualSettings>>({})
   const [timeLeft, setTimeLeft] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
-  
+
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const startTimeRef = useRef<number>(0)
   const pausedTimeRef = useRef<number>(0)
@@ -27,7 +27,7 @@ export const useRitualSession = () => {
       clearInterval(timerRef.current)
       timerRef.current = null
     }
-    
+
     if (currentSession) {
       const completedSession: RitualSession = {
         ...currentSession,
@@ -35,7 +35,7 @@ export const useRitualSession = () => {
         duration: Math.floor((Date.now() - currentSession.startTime - currentSession.totalPausedTime) / 1000),
         completed: true
       }
-      
+
       setCurrentSession(completedSession)
       setState('reward')
       safeSet(STORAGE_KEY, completedSession)
@@ -46,10 +46,10 @@ export const useRitualSession = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
     }
-    
+
     startTimeRef.current = Date.now()
     setTimeLeft(Math.ceil(durationMs / 1000))
-    
+
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -86,7 +86,7 @@ export const useRitualSession = () => {
             return prev - 1
           })
         }, 1000)
-        
+
         // Store timer ref for cleanup
         if (timerRef.current) {
           clearInterval(timerRef.current)
@@ -103,7 +103,7 @@ export const useRitualSession = () => {
     }
     setIsPaused(true)
     pausedTimeRef.current = Date.now()
-    
+
     if (currentSession) {
       const updatedSession = {
         ...currentSession,
@@ -125,7 +125,7 @@ export const useRitualSession = () => {
       setCurrentSession(updatedSession)
       safeSet(STORAGE_KEY, updatedSession)
     }
-    
+
     setIsPaused(false)
     if (timeLeft > 0) {
       startTimer(timeLeft * 1000)
@@ -141,11 +141,11 @@ export const useRitualSession = () => {
       completed: false,
       totalPausedTime: 0
     }
-    
+
     setCurrentSession(session)
     setState('active')
     safeSet(STORAGE_KEY, session)
-    
+
     // Не запускаем таймер автоматически - только создаем сессию
   }, [])
 
@@ -184,7 +184,7 @@ export const useRitualSession = () => {
       clearInterval(timerRef.current)
       timerRef.current = null
     }
-    
+
     setCurrentSession(null)
     setState('idle')
     setTimeLeft(0)

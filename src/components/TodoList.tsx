@@ -42,10 +42,10 @@ const TodoItem = styled(motion.div)<{ $energy: 'easy' | 'medium' | 'energetic' }
 const Checkbox = styled.button<{ $completed: boolean }>`
   width: 24px;
   height: 24px;
-  border: 2px solid ${({ $completed, theme }) => 
+  border: 2px solid ${({ $completed, theme }) =>
     $completed ? theme.color.effort.easy : theme.color.border};
   border-radius: 6px;
-  background: ${({ $completed, theme }) => 
+  background: ${({ $completed, theme }) =>
     $completed ? theme.color.effort.easy : 'transparent'};
   cursor: pointer;
   display: flex;
@@ -82,7 +82,7 @@ const TodoContent = styled.div`
 const TodoText = styled.span<{ $completed: boolean }>`
   font-size: 16px;
   font-weight: 500;
-  color: ${({ $completed, theme }) => 
+  color: ${({ $completed, theme }) =>
     $completed ? theme.color.textMuted : theme.color.text};
   line-height: 1.4;
   text-decoration: ${({ $completed }) => $completed ? 'line-through' : 'none'};
@@ -146,7 +146,7 @@ interface TodoListProps {
   onDelete: (id: string) => void
 }
 
-const TodoListComponent: React.FC<TodoListProps> = ({
+const TodoListComponent: React.FC<TodoListProps> = React.memo(({
   todos,
   onToggle,
 }) => {
@@ -186,7 +186,7 @@ const TodoListComponent: React.FC<TodoListProps> = ({
                 <CheckIcon>✓</CheckIcon>
               )}
             </Checkbox>
-            
+
             <TodoContent>
               <TodoText $completed={todo.completed}>
                 {todo.text}
@@ -203,6 +203,8 @@ const TodoListComponent: React.FC<TodoListProps> = ({
       </AnimatePresence>
     </ListContainer>
   )
-}
+})
+
+TodoListComponent.displayName = 'TodoList'
 
 export const TodoList = React.memo(TodoListComponent)

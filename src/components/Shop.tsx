@@ -71,9 +71,9 @@ const ItemsGrid = styled.div`
 `
 
 const ShopItem = styled.div<{ $canAfford: boolean; $owned: boolean }>`
-  background: ${({ $owned, theme }) => 
+  background: ${({ $owned, theme }) =>
     $owned ? theme.color.effort.easy : theme.color.surface};
-  border: 1px solid ${({ $owned, theme }) => 
+  border: 1px solid ${({ $owned, theme }) =>
     $owned ? theme.color.effort.easy : theme.color.border};
   border-radius: ${tokens.radius.card};
   padding: 12px;
@@ -111,7 +111,7 @@ const BuyButton = styled.button<{ $canAfford: boolean; $owned: boolean }>`
   border-radius: ${tokens.radius.button};
   font-size: 12px;
   font-weight: 600;
-  cursor: ${({ $canAfford, $owned }) => 
+  cursor: ${({ $canAfford, $owned }) =>
     $owned ? 'default' : $canAfford ? 'pointer' : 'not-allowed'};
   border: none;
   margin-top: 8px;
@@ -128,11 +128,11 @@ const BuyButton = styled.button<{ $canAfford: boolean; $owned: boolean }>`
       return `
         background: ${theme.color.accent};
         color: white;
-        
+
         &:hover {
           opacity: 0.9;
         }
-        
+
         &:active {
           transform: scale(0.98);
         }
@@ -236,7 +236,7 @@ const shopItems: ShopItem[] = [
   // },
 ]
 
-const ShopComponent: React.FC<ShopProps> = ({
+const ShopComponent: React.FC<ShopProps> = React.memo(({
   points,
   ownedItems,
   onPurchase,
@@ -272,7 +272,7 @@ const ShopComponent: React.FC<ShopProps> = ({
             {showOwned ? 'Скрыть' : 'Показать'}
           </ToggleButton>
         </SectionHeader>
-        
+
         <AnimatePresence>
           {showOwned && (
             <motion.div
@@ -334,7 +334,9 @@ const ShopComponent: React.FC<ShopProps> = ({
       </Section>
     </ShopContainer>
   )
-}
+})
+
+ShopComponent.displayName = 'Shop'
 
 export const Shop = React.memo(ShopComponent)
 

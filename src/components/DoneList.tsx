@@ -167,7 +167,7 @@ interface DoneListProps {
   onClearCompleted: () => void
 }
 
-const DoneListComponent: React.FC<DoneListProps> = ({
+const DoneListComponent: React.FC<DoneListProps> = React.memo(({
   todos,
   onClearCompleted,
 }) => {
@@ -176,7 +176,7 @@ const DoneListComponent: React.FC<DoneListProps> = ({
 
   const handleClearCompleted = () => {
     onClearCompleted()
-    
+
     showToast('Очищено. Вернуть?', {
       action: {
         label: 'Вернуть',
@@ -193,7 +193,7 @@ const DoneListComponent: React.FC<DoneListProps> = ({
     const now = new Date()
     const diffTime = now.getTime() - date.getTime()
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays === 0) return 'Сегодня'
     if (diffDays === 1) return 'Вчера'
     return `${diffDays} дн. назад`
@@ -221,7 +221,7 @@ const DoneListComponent: React.FC<DoneListProps> = ({
           Очистить завершённые
         </ClearButton>
       </ListHeader>
-      
+
       <AnimatePresence>
         {completedTodos.map((todo, index) => (
           <DoneItem
@@ -235,7 +235,7 @@ const DoneListComponent: React.FC<DoneListProps> = ({
             <Checkbox>
               <CheckIcon>✓</CheckIcon>
             </Checkbox>
-            
+
             <TodoContent>
               <TodoText>{todo.text}</TodoText>
               <TodoMeta>
@@ -255,6 +255,8 @@ const DoneListComponent: React.FC<DoneListProps> = ({
       </AnimatePresence>
     </ListContainer>
   )
-}
+})
+
+DoneListComponent.displayName = 'DoneList'
 
 export const DoneList = React.memo(DoneListComponent)

@@ -1,246 +1,153 @@
-import React, { useEffect, useRef, useState } from 'react'
-import styled from 'styled-components'
-import { motion, AnimatePresence, PanInfo } from 'framer-motion'
-import { tokens } from '../design/tokens'
-import { playButtonClick } from '../utils/sounds'
+import React, { useEffect } from "react";
+import { motion, useMotionValue, useTransform, AnimatePresence, animate } from "framer-motion";
+import styled from "styled-components";
 
-const Overlay = styled(motion.div).withConfig({
-  shouldForwardProp: (prop) => !prop.startsWith('$')
-})<{ $isDragging: boolean }>`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: ${({ $isDragging }) => 
-    $isDragging ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.5)'};
-  z-index: 1000;
-  transition: background-color 0.2s ease;
-`
+type BottomSheetProps = {
+  open: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  ariaLabel?: string;
+};
 
-const SheetContainer = styled(motion.div).withConfig({
-  shouldForwardProp: (prop) => !prop.startsWith('$')
-})`
+const CLOSE_THRESHOLD_PX = 120;
+const CLOSE_VELOCITY_PX_S = 900;
+
+const Overlay = styled(motion.div)`
   position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 40;
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+`;
+
+const SheetContainer = styled.div`
+  position: fixed;
+  inset-inline: 0;
   bottom: 0;
-  left: 0;
-  right: 0;
-  background: ${({ theme }) => theme.color.surface};
-  border-radius: 20px 20px 0 0;
-  max-height: min(88dvh, 720px);
-  overflow: hidden;
-  z-index: 1001;
-  display: flex;
-  flex-direction: column;
-  padding-top: 8px;
-  
-  @media (max-height: 640px) {
-    max-height: 92dvh;
-  }
-`
+  z-index: 50;
+  pointer-events: none;
+`;
+
+const SheetContent = styled(motion.div)`
+  pointer-events: auto;
+  background: white;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12),
+              0 -2px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0));
+  min-height: 50vh;
+  max-height: 85vh;
+  overflow-y: auto;
+  will-change: transform;
+`;
 
 const GripArea = styled.div<{ $isDragging: boolean }>`
-  height: ${tokens.zones.gripArea};
   display: flex;
-  align-items: center;
   justify-content: center;
-  cursor: grab;
-  padding: ${tokens.space.sm} 0;
-  transition: all 0.2s ease;
-  
-  &::before {
-    content: '';
-    width: ${({ $isDragging }) => $isDragging ? '50px' : '40px'};
-    height: 4px;
-    background: ${({ theme, $isDragging }) => 
-      $isDragging ? theme.color.textMuted : theme.color.border};
-    border-radius: 2px;
-    transition: all 0.2s ease;
-  }
-  
-  &:active {
-    cursor: grabbing;
-  }
-`
+  align-items: center;
+  padding: 12px 0;
+  cursor: ${({ $isDragging }) => ($isDragging ? "grabbing" : "grab")};
+  user-select: none;
+`;
 
-const SheetContent = styled.div`
-  flex: 1 1 auto;
-  overflow: auto;
-  padding: 12px 20px 20px;
-  overscroll-behavior: contain;
-  min-width: 0;
-`
+const Grip = styled.div`
+  width: 48px;
+  height: 6px;
+  background: rgba(167, 199, 183, 0.6);
+  border-radius: 3px;
+`;
 
-const SheetHeader = styled.div`
-  padding: 12px 20px;
-  flex: 0 0 auto;
-  text-align: center;
-`
+export const BottomSheet = React.memo(function BottomSheet({ open, onClose, children, ariaLabel = "Диалог" }: BottomSheetProps) {
+  const y = useMotionValue(0);
+  const backdropOpacity = useTransform(y, [0, 240], [0.6, 0]);
 
-const SheetTitle = styled.h2`
-  font-size: ${tokens.typography.fontSize.xl};
-  font-weight: ${tokens.typography.fontWeight.semibold};
-  font-family: ${tokens.typography.fontFamily.primary};
-  color: ${({ theme }) => theme.color.text};
-  margin: 0 0 ${tokens.space.sm} 0;
-  line-height: ${tokens.typography.lineHeight.tight};
-`
-
-const SheetSubtitle = styled.p`
-  font-size: ${tokens.typography.fontSize.base};
-  font-weight: ${tokens.typography.fontWeight.normal};
-  font-family: ${tokens.typography.fontFamily.primary};
-  color: ${({ theme }) => theme.color.textMuted};
-  margin: 4px 0 12px;
-  line-height: 1.3;
-  white-space: normal;
-  overflow-wrap: anywhere;
-`
-
-const ActionBar = styled.div`
-  flex: 0 0 auto;
-  position: sticky;
-  bottom: 0;
-  padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0));
-  background: color-mix(in oklab, ${({ theme }) => theme.color.surface}, transparent 8%);
-  backdrop-filter: blur(6px);
-  border-top: 1px solid ${({ theme }) => theme.color.border};
-`
-
-interface BottomSheetProps {
-  isOpen: boolean
-  onClose: () => void
-  title?: string
-  subtitle?: string
-  children: React.ReactNode
-  actionBar?: React.ReactNode
-  showGrip?: boolean
-}
-
-export const BottomSheet: React.FC<BottomSheetProps> = ({
-  isOpen,
-  onClose,
-  title,
-  subtitle,
-  children,
-  actionBar,
-  showGrip = true
-}) => {
-  const [dragY, setDragY] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const sheetRef = useRef<HTMLDivElement>(null)
-
-  // Handle drag gestures
-  const handleDragStart = () => {
-    setIsDragging(true)
-  }
-
-  const handleDrag = (_: unknown, info: PanInfo) => {
-    // Allow dragging down only
-    if (info.offset.y > 0) {
-      setDragY(info.offset.y)
-    }
-  }
-
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    setIsDragging(false)
-    
-    // Close if dragged down more than 80px or with sufficient velocity
-    const shouldClose = info.offset.y > 80 || info.velocity.y > 300
-    
-    if (shouldClose) {
-      onClose()
-      playButtonClick()
-    } else {
-      // Smooth return to original position
-      setDragY(0)
-    }
-  }
-
-  // Handle escape key and prevent body scroll
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose()
-        playButtonClick()
-      }
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden'
-      document.body.style.touchAction = 'none'
-    }
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
-      document.body.style.touchAction = 'auto'
-    }
-  }, [isOpen, onClose])
-
-  // Reset drag state when opening
-  useEffect(() => {
-    if (isOpen) {
-      setDragY(0)
-      setIsDragging(false)
-    }
-  }, [isOpen])
+      window.removeEventListener("keydown", onKey);
+      // Восстанавливаем скролл при размонтировании
+      document.body.style.overflow = "";
+    };
+  }, [open, onClose]);
 
   return (
-    <AnimatePresence>
-      {isOpen && (
+    <AnimatePresence mode="sync" initial={false}>
+      {open && (
         <>
           <Overlay
-            $isDragging={isDragging}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             onClick={onClose}
-            transition={{ duration: 0.2 }}
+            style={{ opacity: backdropOpacity }}
+            initial={{ opacity: 0.6 }} // мгновенно появляется с полной прозрачностью
+            animate={{ opacity: 0.6 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
           />
-          <SheetContainer
-            ref={sheetRef}
-            initial={{ y: '100%' }}
-            animate={{ 
-              y: isDragging ? dragY : 0,
-              transition: isDragging 
-                ? { type: 'tween', duration: 0 }
-                : { type: 'spring', damping: 30, stiffness: 400, mass: 0.8 }
-            }}
-            exit={{ 
-              y: '100%',
-              transition: { type: 'spring', damping: 25, stiffness: 300 }
-            }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.1 }}
-            dragMomentum={false}
-            onDragStart={handleDragStart}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
-            style={{
-              willChange: isDragging ? 'transform' : 'auto'
-            }}
-          >
-            {showGrip && <GripArea $isDragging={isDragging} />}
-            
-            {(title || subtitle) && (
-              <SheetHeader>
-                {title && <SheetTitle>{title}</SheetTitle>}
-                {subtitle && <SheetSubtitle>{subtitle}</SheetSubtitle>}
-              </SheetHeader>
-            )}
-            
-            <SheetContent>
+
+          <SheetContainer>
+            <SheetContent
+              role="dialog"
+              aria-modal="true"
+              aria-label={ariaLabel}
+              drag="y"
+              dragDirectionLock
+              dragElastic={{ top: 0, bottom: 0.25 }}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragMomentum={false}
+              style={{ y }}
+              initial={{ y: 0 }} // мгновенное появление в финальной позиции
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{
+                duration: 0.2,
+                ease: [0.4, 0, 0.2, 1],
+              }}
+              onDragEnd={async (_, info) => {
+                const offset = info.offset.y;
+                const velocity = info.velocity.y;
+                const shouldClose =
+                  offset > CLOSE_THRESHOLD_PX || velocity > CLOSE_VELOCITY_PX_S;
+
+                if (shouldClose) {
+                  try {
+                    (window as unknown as { Telegram?: { WebApp?: { HapticFeedback?: { impactOccurred?: (type: string) => void } } } }).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.("light");
+                  } catch {
+                    // Ignore haptic feedback errors
+                  }
+                  // Плавное закрытие вниз
+                  await animate(y, window.innerHeight, {
+                    duration: 0.2,
+                    ease: [0.4, 0, 0.2, 1],
+                  });
+                  onClose();
+                } else {
+                  // Возврат в исходную позицию с пружинной анимацией
+                  await animate(y, 0, {
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                    mass: 0.8,
+                  });
+                }
+              }}
+            >
+              <GripArea $isDragging={false}><Grip /></GripArea>
               {children}
             </SheetContent>
-            
-            {actionBar && <ActionBar>{actionBar}</ActionBar>}
           </SheetContainer>
         </>
       )}
     </AnimatePresence>
-  )
-}
+  );
+})

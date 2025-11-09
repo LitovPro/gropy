@@ -9,24 +9,26 @@ import { playButtonClick } from '../utils/sounds'
 const CardContainer = styled(motion.div).withConfig({
   shouldForwardProp: (prop) => !prop.startsWith('$')
 })<{ $isSelected?: boolean }>`
-  background: ${({ theme, $isSelected }) => 
-    $isSelected 
+  background: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `linear-gradient(135deg, ${theme['color']['pet']['accent']}20, ${theme['color']['warm']['medium']}20)`
       : theme['color']['surface']};
-  border: 2px solid ${({ theme, $isSelected }) => 
+  border: 2px solid ${({ theme, $isSelected }) =>
     $isSelected ? theme['color']['pet']['accent'] : theme['color']['border']};
   border-radius: ${tokens.radius.lg};
   padding: ${tokens.space.md};
-  transition: all ${tokens.motion.fast} ${tokens.motion.easing};
+  transition: transform ${tokens.motion.fast} ${tokens.motion.easing}, box-shadow ${tokens.motion.fast} ${tokens.motion.easing};
   position: relative;
-  overflow: hidden;
-  min-height: 92px;
+  min-height: 120px;
   display: grid;
   align-content: center;
-  box-shadow: ${({ theme, $isSelected }) => 
-    $isSelected 
+  box-shadow: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `0 4px 16px ${theme['color']['pet']['accent']}30`
       : `0 2px 8px ${theme['color']['border']}20`};
+  overflow: hidden;
+  will-change: transform;
+  transform: translateZ(0);
 
   &::before {
     content: '';
@@ -40,9 +42,9 @@ const CardContainer = styled(motion.div).withConfig({
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme, $isSelected }) => 
-      $isSelected 
+    transform: translateY(-2px) translateZ(0);
+    box-shadow: ${({ theme, $isSelected }) =>
+      $isSelected
         ? `0 6px 20px ${theme['color']['pet']['accent']}40`
         : `0 4px 12px ${theme['color']['border']}30`};
 
@@ -52,7 +54,7 @@ const CardContainer = styled(motion.div).withConfig({
   }
 
   &:active {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 `
 
@@ -61,7 +63,7 @@ const CardIcon = styled.div`
   margin-bottom: ${tokens.space.xs};
   transition: transform ${tokens.motion.fast} ${tokens.motion.easing};
   text-align: center;
-  
+
   ${CardContainer}:hover & {
     transform: scale(1.1);
   }
@@ -75,6 +77,9 @@ const CardTitle = styled.h3`
   margin: 0 0 ${tokens.space.xs} 0;
   text-align: center;
   line-height: ${tokens.typography.lineHeight.tight};
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 
   /* Mobile adaptation */
   @media (max-width: 480px) {
@@ -84,18 +89,21 @@ const CardTitle = styled.h3`
 `
 
 const CardDescription = styled.p`
-  font-size: ${tokens.typography.fontSize.xs};
+  font-size: ${tokens.typography.fontSize.sm};
   font-weight: ${tokens.typography.fontWeight.normal};
   font-family: ${tokens.typography.fontFamily.primary};
   color: ${({ theme }) => theme['color']['textMuted']};
   margin: 0 0 ${tokens.space.sm} 0;
   text-align: center;
   line-height: ${tokens.typography.lineHeight.normal};
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 
   /* Mobile adaptation */
   @media (max-width: 480px) {
-    font-size: 11px;
-    line-height: 1.3;
+    font-size: 12px;
+    line-height: 1.4;
   }
 `
 
@@ -112,22 +120,22 @@ const TileCta = styled(motion.button).withConfig({
   font-size: ${tokens.typography.fontSize.sm};
   font-family: ${tokens.typography.fontFamily.primary};
   padding: ${tokens.space.sm} ${tokens.space.md};
-  background: ${({ theme }) => 
+  background: ${({ theme }) =>
     `linear-gradient(135deg, ${theme['color']['pet']['primary']}20, ${theme['color']['warm']['medium']}20)`};
   color: ${({ theme }) => theme['color']['text']};
   border: 1px solid ${({ theme }) => theme['color']['pet']['primary']}40;
-  transition: all ${tokens.motion.fast} ${tokens.motion.easing};
+  transition: transform ${tokens.motion.fast} ${tokens.motion.easing}, box-shadow ${tokens.motion.fast} ${tokens.motion.easing};
   width: 100%;
 
   &:hover {
-    background: ${({ theme }) => 
+    background: ${({ theme }) =>
       `linear-gradient(135deg, ${theme['color']['pet']['primary']}30, ${theme['color']['warm']['medium']}30)`};
     border-color: ${({ theme }) => theme['color']['pet']['primary']};
     transform: translateY(-1px);
   }
 
   &:active {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 
   &:focus-visible {
@@ -138,7 +146,7 @@ const TileCta = styled(motion.button).withConfig({
 
 const SettingsButton = styled(motion.button).withConfig({
   shouldForwardProp: (prop) => !prop.startsWith('$')
-})`
+})<{ $isTask?: boolean }>`
   position: absolute;
   top: ${tokens.space.sm};
   right: ${tokens.space.sm};
@@ -152,14 +160,17 @@ const SettingsButton = styled(motion.button).withConfig({
   justify-content: center;
   cursor: pointer;
   font-size: 16px;
-  transition: all ${tokens.motion.fast} ${tokens.motion.easing};
+  color: ${({ theme }) => theme['color']['textMuted']};
+  transition: transform ${tokens.motion.fast} ${tokens.motion.easing}, box-shadow ${tokens.motion.fast} ${tokens.motion.easing};
   z-index: 10;
   pointer-events: auto;
+  opacity: 0.7;
 
   &:hover {
     background: ${({ theme }) => theme['color']['pet']['accent']}20;
     border-color: ${({ theme }) => theme['color']['pet']['accent']};
     transform: scale(1.1);
+    opacity: 1;
   }
 `
 
@@ -187,15 +198,17 @@ interface RitualCardProps {
   onStart: (ritualId: string, mode: 'guided' | 'quick') => void
   onRemove: (ritualId: string) => void
   isSelected?: boolean
+  isTask?: boolean // New prop to indicate if this is a task (for styling)
 }
 
-export const RitualCard: React.FC<RitualCardProps> = ({
+export const RitualCard = React.forwardRef<HTMLDivElement, RitualCardProps>(({
   ritual,
   settings,
   onStart,
   onRemove,
-  isSelected = false
-}) => {
+  isSelected = false,
+  isTask = false
+}, ref) => {
   const [isLongPressing, setIsLongPressing] = useState(false)
   const longPressTimer = useRef<number | null>(null)
   const startPos = useRef<{ x: number; y: number } | null>(null)
@@ -214,7 +227,7 @@ export const RitualCard: React.FC<RitualCardProps> = ({
     }
 
     button.addEventListener('click', handleDirectClick, true)
-    
+
     return () => {
       button.removeEventListener('click', handleDirectClick, true)
     }
@@ -223,7 +236,7 @@ export const RitualCard: React.FC<RitualCardProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     startPos.current = { x: e.clientX, y: e.clientY }
     setIsLongPressing(true)
-    
+
     longPressTimer.current = window.setTimeout(() => {
       if (startPos.current) {
         onRemove(ritual.id)
@@ -259,15 +272,15 @@ export const RitualCard: React.FC<RitualCardProps> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    
+
     // Check if click was on the remove button or its children
     const target = e.target as HTMLElement
-    if (target.closest('button[title="Скрыть ритуал"]') || 
+    if (target.closest('button[title="Скрыть ритуал"]') ||
         target.closest('button[style*="z-index: 10"]') ||
         target.textContent === '✕') {
       return // Don't start ritual if clicking remove button
     }
-    
+
     if (!isLongPressing) {
       onStart(ritual.id, settings.mode)
       playButtonClick()
@@ -286,7 +299,7 @@ export const RitualCard: React.FC<RitualCardProps> = ({
       startPos.current = { x: touch.clientX, y: touch.clientY }
     }
     setIsLongPressing(true)
-    
+
     longPressTimer.current = window.setTimeout(() => {
       if (startPos.current) {
         onRemove(ritual.id)
@@ -309,7 +322,7 @@ export const RitualCard: React.FC<RitualCardProps> = ({
       if (touch) {
         const deltaX = Math.abs(touch.clientX - startPos.current.x)
         const deltaY = Math.abs(touch.clientY - startPos.current.y)
-      
+
         // If moved too much, cancel long press
         if (deltaX > 10 || deltaY > 10) {
           if (longPressTimer.current) {
@@ -324,6 +337,7 @@ export const RitualCard: React.FC<RitualCardProps> = ({
 
   return (
     <CardContainer
+      ref={ref}
       $isSelected={isSelected}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
@@ -332,8 +346,14 @@ export const RitualCard: React.FC<RitualCardProps> = ({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.1, ease: 'easeOut' }}
+      whileTap={{ scale: 0.99 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{
+        duration: 0.2,
+        ease: 'easeOut'
+      }}
     >
       <AnimatePresence>
         {settings.mode === 'quick' && (
@@ -359,37 +379,40 @@ export const RitualCard: React.FC<RitualCardProps> = ({
         )}
       </AnimatePresence>
 
-      <SettingsButton
-        ref={removeButtonRef}
-        onClick={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          onRemove(ritual.id)
-          playButtonClick()
-          return false
-        }}
-        onMouseDown={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-        }}
-        onMouseUp={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-        }}
-        onPointerDown={(e) => {
-          e.stopPropagation()
-        }}
-        onPointerUp={(e) => {
-          e.stopPropagation()
-        }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        transition={{ duration: 0.1 }}
-        title="Скрыть ритуал"
-        style={{ pointerEvents: 'auto', zIndex: 10 }}
-      >
-        ✕
-      </SettingsButton>
+      {ritual.id !== 'breath' && (
+        <SettingsButton
+          ref={removeButtonRef}
+          $isTask={isTask}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            onRemove(ritual.id)
+            playButtonClick()
+            return false
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+          }}
+          onMouseUp={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation()
+          }}
+          onPointerUp={(e) => {
+            e.stopPropagation()
+          }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ duration: 0.1 }}
+          title={isTask ? "Заменить задачу" : "Скрыть ритуал"}
+          style={{ pointerEvents: 'auto', zIndex: 10 }}
+        >
+          ✕
+        </SettingsButton>
+      )}
 
       {/* Pinned indicator for repeatable rituals */}
       {ritual.type === 'repeatable' && (
@@ -407,15 +430,17 @@ export const RitualCard: React.FC<RitualCardProps> = ({
       <CardDescription>
         {settings.mode === 'guided' ? ritual.description : ritual.quickDescription}
       </CardDescription>
-      
+
       <TileCta
         onClick={handleTileCtaClick}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
         transition={{ duration: 0.1 }}
       >
         Начать
       </TileCta>
     </CardContainer>
   )
-}
+})
+
+RitualCard.displayName = 'RitualCard'

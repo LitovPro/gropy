@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { motion } from 'framer-motion'
 import { tokens } from '../design/tokens'
@@ -67,11 +67,11 @@ const SupportOptions = styled.div`
 `
 
 const SupportButton = styled(motion.button)<{ isSelected?: boolean }>`
-  background: ${({ theme, isSelected }) => 
+  background: ${({ theme, isSelected }) =>
     isSelected ? theme.color.pet.primary : theme.color.surface};
-  color: ${({ theme, isSelected }) => 
+  color: ${({ theme, isSelected }) =>
     isSelected ? 'white' : theme.color.text};
-  border: 2px solid ${({ theme, isSelected }) => 
+  border: 2px solid ${({ theme, isSelected }) =>
     isSelected ? theme.color.pet.primary : theme.color.border};
   border-radius: ${tokens.radius.button};
   padding: ${tokens.space.sm} ${tokens.space.md};
@@ -154,7 +154,7 @@ const SupportActionButton = styled(motion.button)`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    transform: translateY(0);
   }
 `
 
@@ -180,10 +180,15 @@ const supportMessages = [
   'твоя поддержка помогает другим найти место, где можно просто быть 💫',
 ]
 
-export const SupportCard: React.FC<SupportCardProps> = ({ className }) => {
+export const SupportCard: React.FC<SupportCardProps> = React.memo(({ className }) => {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showThankYou, setShowThankYou] = useState(false)
+
+  // Memoize the support message to prevent re-rendering
+  const supportMessage = useMemo(() => {
+    return supportMessages[Math.floor(Math.random() * supportMessages.length)]
+  }, [selectedAmount]) // Only change when selectedAmount changes
 
   const handleAmountSelect = useCallback((amount: number) => {
     setSelectedAmount(amount)
@@ -205,7 +210,7 @@ export const SupportCard: React.FC<SupportCardProps> = ({ className }) => {
       if (success) {
         setShowThankYou(true)
         telegramNotification('success')
-        
+
         // Hide thank you message after 3 seconds
         setTimeout(() => {
           setShowThankYou(false)
@@ -258,7 +263,7 @@ export const SupportCard: React.FC<SupportCardProps> = ({ className }) => {
       {selectedAmount && (
         <SupportMessage>
           <MessageText>
-            {supportMessages[Math.floor(Math.random() * supportMessages.length)]}
+            {supportMessage}
           </MessageText>
         </SupportMessage>
       )}
@@ -270,8 +275,10 @@ export const SupportCard: React.FC<SupportCardProps> = ({ className }) => {
         whileTap={{ scale: 0.98 }}
       >
         <HeartIcon>💚</HeartIcon>
-        {isProcessing ? 'обрабатываю...' : `поддержать ${selectedAmount || ''} ⭐`}
+        {isProcessing ? 'обрабатываю...' : `поддержать ${selectedAmount ?? ''} ⭐`}
       </SupportActionButton>
     </SupportContainer>
   )
-}
+})
+
+SupportCard.displayName = 'SupportCard'

@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useMemo } from 'react'
-// Updated: handleRitualSettings -> handleRitualRemove
 import styled from 'styled-components'
 import { AnimatePresence } from 'framer-motion'
 import { tokens } from '../design/tokens'
@@ -10,67 +9,51 @@ import { RitualCard } from './RitualCard'
 import { RitualPreview } from './RitualPreview'
 import { BottomSheet } from './BottomSheet'
 import { RitualActive } from './RitualActive'
-// import { RitualReflection } from './RitualReflection' // Removed
 import { RitualReward } from './RitualReward'
 import { ShareCard } from './ShareCard'
 import { Ritual, BreathingMode } from '../types/rituals'
 
-const RitualsContainer = styled.div`
+const ExercisesContainer = styled.div`
   min-height: calc(100dvh - 56px - env(safe-area-inset-bottom, 0));
   display: grid;
   grid-template-rows: auto 1fr;
   max-width: 600px;
   margin: 0 auto;
   padding-bottom: calc(56px + env(safe-area-inset-bottom, 0));
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 `
-
-// Temporarily unused styled components
-// const Header = styled.div`
-//   padding: ${tokens.space.lg} ${tokens.space.lg} 0;
-//   text-align: center;
-// `
-
-// const HeaderTitle = styled.h1`
-//   font-size: ${tokens.typography.fontSize['2xl']};
-//   font-weight: ${tokens.typography.fontWeight.semibold};
-//   font-family: ${tokens.typography.fontFamily.primary};
-//   color: ${({ theme }) => theme.color.text};
-//   margin: 0 0 ${tokens.space.sm} 0;
-//   line-height: ${tokens.typography.lineHeight.tight};
-// `
-
-// const HeaderSubtitle = styled.p`
-//   font-size: ${tokens.typography.fontSize.base};
-//   font-weight: ${tokens.typography.fontWeight.normal};
-//   font-family: ${tokens.typography.fontFamily.primary};
-//   color: ${({ theme }) => theme.color.textMuted};
-//   margin: 0;
-//   line-height: ${tokens.typography.lineHeight.normal};
-// `
 
 const ContentArea = styled.div`
   padding: ${tokens.space.lg};
   overflow-y: auto;
+
+  @media (max-width: 480px) {
+    padding: ${tokens.space.md};
+  }
+
+  @media (max-width: 360px) {
+    padding: ${tokens.space.sm};
+  }
 `
 
 const ProgressCard = styled.div`
-  background: ${({ theme }) => theme.color.surface};
-  border: 2px solid ${({ theme }) => theme.color.border};
-  border-radius: ${tokens.radius.card};
-  padding: ${tokens.space.lg};
-  margin-bottom: ${tokens.space.lg};
+  background: #FFFFFF;
+  border: 2px solid #DDE7E1;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 6px;
   text-align: center;
-`
 
-// Temporarily unused styled component
-// const ProgressTitle = styled.h2`
-//   font-size: ${tokens.typography.fontSize.xl};
-//   font-weight: ${tokens.typography.fontWeight.semibold};
-//   font-family: ${tokens.typography.fontFamily.primary};
-//   color: ${({ theme }) => theme.color.text};
-//   margin: 0 0 ${tokens.space.sm} 0;
-//   line-height: ${tokens.typography.lineHeight.tight};
-// `
+  @media (max-width: 480px) {
+    padding: 16px;
+  }
+
+  @media (max-width: 360px) {
+    padding: 12px;
+  }
+`
 
 const ProgressText = styled.p`
   font-size: ${tokens.typography.fontSize.base};
@@ -81,19 +64,28 @@ const ProgressText = styled.p`
   line-height: ${tokens.typography.lineHeight.normal};
 `
 
-const RitualsGrid = styled.div`
+const ExercisesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: ${tokens.space.md};
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: ${tokens.space.sm};
+  }
+
+  @media (max-width: 360px) {
+    gap: ${tokens.space.xs};
+  }
 `
 
-interface RitualsPagerProps {
+interface ExercisesPagerProps {
   completedRituals: string[]
   onCompleteRitual: (ritualId: string) => void
   maxDailyRituals: number
 }
 
-export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
+const ExercisesPagerComponent: React.FC<ExercisesPagerProps> = React.memo(({
   completedRituals,
   onCompleteRitual,
   _maxDailyRituals
@@ -114,15 +106,19 @@ export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
     pauseTimer,
     resumeTimer,
     completeSession,
-    // addReflection, // Removed - no reflection step
     finishSession,
     cancelSession,
     updateSettings,
     getSettings
   } = useRitualSession()
 
+  // Filter exercises - only breathing
+  const exerciseRituals = useMemo(() => {
+    return RITUALS.filter(ritual => ritual.id === 'breath')
+  }, [])
+
   const handleRitualStart = useCallback((ritualId: string, mode: 'guided' | 'quick') => {
-    const ritual = RITUALS.find(r => r.id === ritualId)
+    const ritual = exerciseRituals.find(r => r.id === ritualId)
     if (!ritual) return
 
     const settings = getSettings(ritualId)
@@ -132,48 +128,35 @@ export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
     setShowPreview(false)
     startSession(ritualId, mode, duration)
     playButtonClick()
-  }, [getSettings, startSession])
+  }, [exerciseRituals, getSettings, startSession])
 
   const handleRitualResume = useCallback(() => {
-    // handleRitualResume debug removed
-
     if (currentSession && timeLeft === 0) {
-      // Check if we have the ritual ID
       if (!currentSession.ritualId) {
-        // currentSession.ritualId is undefined
         return
       }
 
-      // Start the timer for the current session
-      // Starting timer for session
       const settings = getSettings(currentSession.ritualId)
-      const ritual = RITUALS.find(r => r.id === currentSession.ritualId)
+      const ritual = exerciseRituals.find(r => r.id === currentSession.ritualId)
 
-      // For breathing exercise, stretch, and walk - don't use timer
-      if (currentSession.ritualId === 'breath' || currentSession.ritualId === 'breathe' ||
-          currentSession.ritualId === 'stretch' || currentSession.ritualId === 'walk') {
-        // Don't start timer for these rituals - they are user-controlled
+      // For breathing exercise - don't use timer
+      if (currentSession.ritualId === 'breath') {
+        // Don't start timer for breathing - it's cycle-based
       } else {
         const duration = settings.duration ?? ritual?.defaultDuration ?? 30
         startRitualTimer(duration)
       }
-    } else {
-      // Cannot start - conditions not met
     }
-  }, [currentSession, timeLeft, startRitualTimer, getSettings])
+  }, [currentSession, timeLeft, startRitualTimer, getSettings, exerciseRituals])
 
   const handleRitualRemove = useCallback((ritualId: string) => {
-    // Remove/hide ritual from the list (temporary, until page refresh)
-    const ritual = RITUALS.find(r => r.id === ritualId)
+    const ritual = exerciseRituals.find(r => r.id === ritualId)
 
     if (ritual) {
-      // Add to hidden rituals (temporary) - no confirmation needed
       setHiddenRituals(prev => new Set([...prev, ritualId]))
-      // Ritual hidden temporarily
+      // Exercise hidden temporarily
     }
-  }, [])
-
-  // handleReflectionComplete removed - no reflection step
+  }, [exerciseRituals])
 
   const handleSessionFinish = useCallback(() => {
     if (currentSession) {
@@ -208,32 +191,34 @@ export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
     }
   }, [selectedRitual, updateSettings])
 
-  const completedCount = completedRituals.length
-  // const remainingCount = maxDailyRituals - completedCount
+  const completedCount = completedRituals.filter(id =>
+    exerciseRituals.some(ritual => ritual.id === id)
+  ).length
 
-  // Rich collection of progress messages and quotes
-  const getProgressMessage = (count: number) => {
+  // Progress messages for exercises - memoized to prevent re-rendering
+  const progressMessage = useMemo(() => {
+    const count = completedCount
+
     if (count === 0) {
       const messages = [
-        "Готов начать день? ✨",
-        "Выбери свой первый ритуал 🌱",
-        "Время для заботы о себе 💚",
-        "Начни с малого 🌿",
-        "Твой день начинается здесь ☀️",
-        "Что выберешь первым? 🤔",
-        "Готов к ритуалам? 🧘",
-        "Время для себя 💫",
-        "Начни с простого 🌸",
-        "Выбери что-то приятное 🌺"
+        "Готов к дыхательным упражнениям? 🌬️",
+        "Время для дыхательной практики 🧘",
+        "Начни с дыхания ✨",
+        "Дыхание - основа спокойствия 🌿",
+        "Время для осознанного дыхания 💚",
+        "Готов дышать осознанно? 🌱",
+        "Дыхание успокаивает ум 🌸",
+        "Начни с глубокого вдоха 💫",
+        "Дыхание - твой якорь ⚓",
+        "Время для дыхательной медитации 🕯️"
       ]
       return messages[Math.floor(Math.random() * messages.length)]
     }
 
-    // For 1+ rituals, create dynamic messages with the actual count
     const getCountWord = (num: number) => {
-      if (num === 1) return "ритуал"
-      if (num >= 2 && num <= 4) return "ритуала"
-      return "ритуалов"
+      if (num === 1) return "упражнение"
+      if (num >= 2 && num <= 4) return "упражнения"
+      return "упражнений"
     }
 
     const countWord = getCountWord(count)
@@ -251,62 +236,60 @@ export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
     ]
 
     return messages[Math.floor(Math.random() * messages.length)]
-  }
+  }, [completedCount])
 
-  // Memoized encouraging quote to prevent changing on every render
   const encouragingQuote = useMemo(() => {
     if (completedCount === 0) {
       const quotes = [
-        "Начни с простого ритуала 🌱",
-        "Каждый день - новая возможность ☀️",
-        "Маленькие шаги ведут к большим изменениям 🌿",
-        "Забота о себе - это не роскошь 💚",
-        "Начни с того, что нравится 🌸",
-        "Каждый ритуал - это подарок себе 🎁",
-        "Начни с малого, думай о большом 🌟",
-        "Забота о себе - это инвестиция 💎",
-        "Начни с простого, продолжай с любовью 💫",
-        "Каждый день - шанс стать лучше ✨"
+        "Дыхание - это жизнь 🌬️",
+        "Каждый вдох - новая возможность ☀️",
+        "Дыхание успокаивает ум 🌿",
+        "Осознанное дыхание - это медитация 💚",
+        "Начни с глубокого вдоха 🌸",
+        "Дыхание - твой якорь в моменте 🎁",
+        "Каждый вдох наполняет энергией 🌟",
+        "Дыхание - это подарок себе 💎",
+        "Начни с дыхания, продолжай с осознанностью 💫",
+        "Каждый вдох - шанс стать спокойнее ✨"
       ]
       return quotes[Math.floor(Math.random() * quotes.length)]
     }
 
-    // For 1+ rituals, create dynamic quotes with the actual count
     // Temporarily unused function
     // const getCountWord = (num: number) => {
-    //   if (num === 1) return "ритуал"
-    //   if (num >= 2 && num <= 4) return "ритуала"
-    //   return "ритуалов"
+    //   if (num === 1) return "упражнение"
+    //   if (num >= 2 && num <= 4) return "упражнения"
+    //   return "упражнений"
     // }
 
     // const countWord = getCountWord(completedCount) // Temporarily unused
     const quotes = [
-      `Ты заботишься о себе - это прекрасно 💚`,
-      `Отличный прогресс! Продолжай в том же духе ✨`,
-      `Маленькие шаги ведут к большим изменениям 🌿`,
-      `Каждый ритуал - это подарок себе 🎁`,
-      `Ты делаешь это для себя - это важно 💎`,
-      `Отличная забота о себе! 🌸`,
-      `Ты находишь свой ритм дня 🎵`,
-      `Каждый ритуал приближает к гармонии 🌈`,
-      `Ты заботишься о себе с особой внимательностью 💫`,
-      `Отличный баланс дня! ⚖️`
+      `Ты заботишься о своём дыхании - это прекрасно 💚`,
+      `Отличная дыхательная практика! Продолжай ✨`,
+      `Дыхание ведёт к спокойствию 🌿`,
+      `Каждое упражнение - это подарок себе 🎁`,
+      `Ты делаешь это для своего спокойствия - это важно 💎`,
+      `Отличная забота о дыхании! 🌸`,
+      `Ты находишь свой ритм дыхания 🎵`,
+      `Каждое упражнение приближает к гармонии 🌈`,
+      `Ты дышишь с особой внимательностью 💫`,
+      `Отличный баланс дыхания! ⚖️`
     ]
 
     return quotes[Math.floor(Math.random() * quotes.length)]
   }, [completedCount])
 
   return (
-    <RitualsContainer>
+    <ExercisesContainer>
       <ContentArea>
         <ProgressCard>
           <ProgressText>
-            {completedCount === 0 ? encouragingQuote : `${getProgressMessage(completedCount)}. ${encouragingQuote}`}
+            {completedCount === 0 ? encouragingQuote : `${progressMessage}. ${encouragingQuote}`}
           </ProgressText>
         </ProgressCard>
 
-        <RitualsGrid>
-          {RITUALS.map((ritual) => {
+        <ExercisesGrid>
+          {exerciseRituals.map((ritual) => {
             const isCompleted = completedRituals.includes(ritual.id)
             const settings = getSettings(ritual.id)
 
@@ -315,39 +298,39 @@ export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
               return null
             }
 
-            // For daily rituals, hide if completed
-            if (ritual.type === 'daily' && isCompleted) {
-              return null
+            // For repeatable rituals, don't hide when completed
+            if (ritual.type === 'repeatable') {
+              return (
+                <RitualCard
+                  key={ritual.id}
+                  ritual={ritual}
+                  settings={settings}
+                  onStart={(ritualId, _mode) => {
+                    if (ritualId === 'breath') {
+                      // For breathing exercise, show preview to select breathing mode
+                      setSelectedRitual(ritual)
+                      setShowPreview(true)
+                    } else {
+                      // For other rituals, start immediately
+                      handleRitualStart(ritualId, settings.mode)
+                    }
+                  }}
+                  onRemove={handleRitualRemove}
+                  isSelected={isCompleted}
+                />
+              )
             }
 
-            return (
-              <RitualCard
-                key={ritual.id}
-                ritual={ritual}
-                settings={settings}
-                onStart={(_ritualId, _mode) => {
-                  if (ritual.id === 'breath') {
-                    // For breathing exercise, show preview to select breathing mode
-                    setSelectedRitual(ritual)
-                    setShowPreview(true)
-                  } else {
-                    // For other rituals, start immediately
-                    handleRitualStart(ritual.id, settings.mode)
-                  }
-                }}
-                onRemove={handleRitualRemove}
-                isSelected={isCompleted}
-              />
-            )
+            return null
           })}
-        </RitualsGrid>
+        </ExercisesGrid>
       </ContentArea>
 
       {/* Preview Modal */}
       <BottomSheet
         open={showPreview}
         onClose={handlePreviewClose}
-        ariaLabel={selectedRitual?.title ?? "Предпросмотр ритуала"}
+        ariaLabel={selectedRitual?.title ?? "Предпросмотр упражнения"}
       >
         {selectedRitual && (
           <RitualPreview
@@ -379,8 +362,6 @@ export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
         )}
       </AnimatePresence>
 
-      {/* Reflection - removed */}
-
       {/* Reward */}
       <AnimatePresence>
         {state === 'reward' && selectedRitual && currentSession && (
@@ -398,15 +379,17 @@ export const RitualsPager: React.FC<RitualsPagerProps> = React.memo(({
             type="ritual"
             data={{
               ritualId: lastCompletedRitual,
-              ritualTitle: RITUALS.find(r => r.id === lastCompletedRitual)?.title ?? '',
+              ritualTitle: exerciseRituals.find(r => r.id === lastCompletedRitual)?.title ?? '',
               completedCount: completedCount
             }}
             onClose={() => setShowShare(false)}
           />
         )}
       </AnimatePresence>
-    </RitualsContainer>
+    </ExercisesContainer>
   )
 })
 
-RitualsPager.displayName = 'RitualsPager'
+ExercisesPagerComponent.displayName = 'ExercisesPager'
+
+export const ExercisesPager = React.memo(ExercisesPagerComponent)

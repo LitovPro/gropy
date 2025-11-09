@@ -106,15 +106,15 @@ const Button = styled.button<{ $variant: 'primary' | 'secondary' }>`
       ? `
         background: ${theme.color.accent};
         color: white;
-        
+
         &:hover:not(:disabled) {
           opacity: 0.9;
         }
-        
+
         &:active:not(:disabled) {
           transform: scale(0.98);
         }
-        
+
         &:disabled {
           opacity: 0.5;
           cursor: not-allowed;
@@ -124,11 +124,11 @@ const Button = styled.button<{ $variant: 'primary' | 'secondary' }>`
         background: ${theme.color.surface};
         color: ${theme.color.textMuted};
         border: 1px solid ${theme.color.border};
-        
+
         &:hover:not(:disabled) {
           background: ${theme.color.bg};
         }
-        
+
         &:active:not(:disabled) {
           transform: scale(0.98);
         }
@@ -160,7 +160,7 @@ interface TodoFormProps {
   maxLength?: number
 }
 
-export const TodoForm: React.FC<TodoFormProps> = ({
+export const TodoForm: React.FC<TodoFormProps> = React.memo(({
   onSubmit,
   maxLength = 50,
 }) => {
@@ -171,10 +171,10 @@ export const TodoForm: React.FC<TodoFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const validation = validateTodoText(text)
     if (!validation.isValid) {
-      setError(validation.error || 'Ошибка валидации')
+      setError(validation.error ?? 'Ошибка валидации')
       return
     }
 
@@ -220,7 +220,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
               {error}
             </ErrorMessage>
           )}
-          
+
           <SelectGroup>
             <Select
               value={category}
@@ -232,7 +232,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
               <option value="work">Работа</option>
               <option value="study">Учёба</option>
             </Select>
-            
+
             <Select
               value={energy}
               onChange={(e) => setEnergy(e.target.value as Energy)}
@@ -243,7 +243,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
             </Select>
           </SelectGroup>
         </InputGroup>
-        
+
         <ButtonGroup>
           <Button type="submit" $variant="primary" disabled={!text.trim()}>
             Добавить
@@ -262,7 +262,9 @@ export const TodoForm: React.FC<TodoFormProps> = ({
       </form>
     </FormContainer>
   )
-}
+})
+
+TodoForm.displayName = 'TodoForm'
 
 
 

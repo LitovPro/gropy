@@ -16,7 +16,7 @@ export interface Ritual {
   title: string
   description: string
   icon: string
-  category: 'breath' | 'body' | 'mind' | 'kindness' | 'movement' | 'home' | 'sensory' | 'digital'
+  category: 'breath' | 'body' | 'mind' | 'movement' | 'home' | 'sensory' | 'digital'
   type: 'daily' | 'repeatable' // daily = once per day, repeatable = can do multiple times
   defaultDuration: number
   guidedSteps?: GuidedStep[]
@@ -82,5 +82,5 @@ export const TIME_RECOMMENDATIONS = {
 export const CONTEXT_RECOMMENDATIONS = {
   highStress: ['breath', 'walk', 'stretch', 'massage-temples', 'close-tabs', 'listen-silence'],
   lowEnergy: ['water', 'gratitude', 'breath', 'wash-face', 'play-music', 'hug-self'],
-  normal: ['breath', 'water', 'stretch', 'gratitude', 'kindness', 'walk', 'find-beauty', 'touch-soft']
+  normal: ['breath', 'water', 'stretch', 'gratitude', 'walk', 'find-beauty', 'touch-soft']
 }

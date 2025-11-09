@@ -30,7 +30,7 @@ const VirtualizedItems = styled.div<{ transform: string }>`
   right: 0;
 `
 
-export function VirtualizedList<T>({
+export const VirtualizedList = React.memo(function VirtualizedList<T>({
   items,
   itemHeight,
   containerHeight,
@@ -91,7 +91,7 @@ export function VirtualizedList<T>({
       </VirtualizedContent>
     </VirtualizedContainer>
   )
-}
+})
 
 // Hook for virtualized list performance
 export const useVirtualization = (

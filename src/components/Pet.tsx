@@ -95,7 +95,7 @@ const PetButton = styled(motion.button).withConfig({
   &:hover {
     transform: scale(1.12);
     box-shadow: 0 12px 35px ${tokens.color.shadow}, 0 0 0 2px ${({ theme }) => theme.color.pet.accent}60;
-    
+
     &::before {
       opacity: 1;
     }
@@ -229,7 +229,7 @@ interface PetProps {
   petMood?: 'happy' | 'sleepy' | 'excited' | 'calm'
 }
 
-const PetComponent: React.FC<PetProps> = ({
+const PetComponent: React.FC<PetProps> = React.memo(({
   showVictoryBubble = false,
   onVictoryBubbleShown,
   petMood = 'happy',
@@ -272,7 +272,7 @@ const PetComponent: React.FC<PetProps> = ({
   const handlePetClick = () => {
     hapticLight()
     playPetInteraction()
-    
+
     // Random warm message
     const messages = [
       ...warmMessages.greeting,
@@ -280,7 +280,7 @@ const PetComponent: React.FC<PetProps> = ({
       ...warmMessages.comfort,
     ]
     const randomMessage = messages[Math.floor(Math.random() * messages.length)]
-    
+
     setBubbleText(randomMessage)
     setShowBubble(true)
 
@@ -308,16 +308,16 @@ const PetComponent: React.FC<PetProps> = ({
           y: isHovered ? [-3, 3, -3] : [-2, 2, -2],
           rotate: isHovered ? [-2, 2, -2] : 0,
         }}
-        whileHover={{ 
+        whileHover={{
           scale: 1.12,
           rotate: [0, -8, 8, 0],
         }}
-        whileTap={{ 
+        whileTap={{
           scale: 0.92,
           rotate: [0, -15, 15, 0],
         }}
-        transition={{ 
-          duration: 0.1, 
+        transition={{
+          duration: 0.1,
           ease: 'easeOut',
           // For floating animation
           rotate: {
@@ -340,7 +340,7 @@ const PetComponent: React.FC<PetProps> = ({
           {petEmoji}
         </motion.span>
       </PetButton>
-      
+
 
       <AnimatePresence>
         {showBubble && (
@@ -348,12 +348,9 @@ const PetComponent: React.FC<PetProps> = ({
             initial={{ opacity: 0, scale: 0.7, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.7, y: 20 }}
-            transition={{ 
-              duration: 0.4, 
-              ease: 'easeOut',
-              type: 'spring',
-              stiffness: 200,
-              damping: 20,
+            transition={{
+              duration: 0.4,
+              ease: 'easeOut'
             }}
             role="alert"
             aria-live="polite"
@@ -364,7 +361,9 @@ const PetComponent: React.FC<PetProps> = ({
       </AnimatePresence>
     </PetContainer>
   )
-}
+})
+
+PetComponent.displayName = 'Pet'
 
 export const Pet = React.memo(PetComponent)
 

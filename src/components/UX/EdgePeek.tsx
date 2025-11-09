@@ -37,7 +37,7 @@ interface EdgePeekProps {
   onSwipeStart?: () => void
 }
 
-export const EdgePeek: React.FC<EdgePeekProps> = ({ onSwipeStart }) => {
+export const EdgePeek: React.FC<EdgePeekProps> = React.memo(({ onSwipeStart }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [cycleCount, setCycleCount] = useState(0)
   const timeoutRef = useRef<NodeJS.Timeout>()
@@ -141,7 +141,9 @@ export const EdgePeek: React.FC<EdgePeekProps> = ({ onSwipeStart }) => {
       )}
     </AnimatePresence>
   )
-}
+})
+
+EdgePeek.displayName = 'EdgePeek'
 
 
 

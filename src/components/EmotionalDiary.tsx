@@ -13,7 +13,7 @@ const DiaryContainer = styled.div`
   padding-bottom: calc(${tokens.space.lg} + 56px + env(safe-area-inset-bottom, 0));
   max-width: 600px;
   margin: 0 auto;
-  
+
   @media (max-width: 480px) {
     padding: ${tokens.space.md};
     padding-bottom: calc(${tokens.space.md} + 56px + env(safe-area-inset-bottom, 0));
@@ -23,7 +23,7 @@ const DiaryContainer = styled.div`
 const DiaryHeader = styled.div`
   text-align: center;
   margin-bottom: ${tokens.space.xl};
-  
+
   @media (max-width: 480px) {
     margin-bottom: ${tokens.space.lg};
   }
@@ -36,7 +36,7 @@ const DiaryTitle = styled.h2`
   margin: 0 0 ${tokens.space.sm} 0;
   font-family: ${tokens.typography.fontFamily.primary};
   line-height: ${tokens.typography.lineHeight.tight};
-  
+
   @media (max-width: 480px) {
     font-size: ${tokens.typography.fontSize.xl};
   }
@@ -48,7 +48,7 @@ const DiarySubtitle = styled.p`
   margin: 0;
   font-family: ${tokens.typography.fontFamily.primary};
   line-height: ${tokens.typography.lineHeight.relaxed};
-  
+
   @media (max-width: 480px) {
     font-size: ${tokens.typography.fontSize.sm};
   }
@@ -59,18 +59,18 @@ const EmotionsGrid = styled.div`
   grid-template-columns: repeat(3, 1fr);
   gap: ${tokens.space.sm};
   margin-bottom: ${tokens.space.lg};
-  
+
   @media (max-width: 480px) {
     gap: ${tokens.space.xs};
   }
 `
 
 const EmotionCard = styled(motion.div)<{ isSelected: boolean }>`
-  background: ${({ theme, isSelected }) => 
-    isSelected 
+  background: ${({ theme, isSelected }) =>
+    isSelected
       ? `linear-gradient(135deg, ${theme.color.pet.accent}20, ${theme.color.warm.medium}20)`
       : theme.color.surface};
-  border: 3px solid ${({ theme, isSelected }) => 
+  border: 3px solid ${({ theme, isSelected }) =>
     isSelected ? theme.color.pet.accent : theme.color.border};
   border-radius: ${tokens.radius.card};
   padding: ${tokens.space.lg};
@@ -84,12 +84,12 @@ const EmotionCard = styled(motion.div)<{ isSelected: boolean }>`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: ${({ theme, isSelected }) => 
-    isSelected 
+  box-shadow: ${({ theme, isSelected }) =>
+    isSelected
       ? `0 4px 16px ${theme.color.pet.accent}30`
       : `0 2px 8px ${theme.color.border}20`};
   padding: ${tokens.space.md} ${tokens.space.xs};
-  
+
   @media (max-width: 480px) {
     min-height: 80px;
     padding: ${tokens.space.sm} ${tokens.space.xs};
@@ -120,7 +120,7 @@ const EmotionIcon = styled.div`
   line-height: 1;
   position: relative;
   z-index: 1;
-  
+
   @media (max-width: 480px) {
     font-size: 24px;
   }
@@ -139,7 +139,7 @@ const EmotionLabel = styled.div`
   text-overflow: ellipsis;
   max-width: 100%;
   text-align: center;
-  
+
   @media (max-width: 480px) {
     font-size: ${tokens.typography.fontSize.xs};
   }
@@ -152,7 +152,7 @@ const IntensitySection = styled(motion.div)`
   border-radius: ${tokens.radius.card};
   padding: ${tokens.space.lg};
   margin-bottom: ${tokens.space.lg};
-  
+
   @media (max-width: 480px) {
     padding: ${tokens.space.md};
     margin-bottom: ${tokens.space.md};
@@ -167,7 +167,7 @@ const IntensityTitle = styled.h3`
   font-family: ${tokens.typography.fontFamily.primary};
   line-height: ${tokens.typography.lineHeight.normal};
   text-align: center;
-  
+
   @media (max-width: 480px) {
     font-size: ${tokens.typography.fontSize.base};
     margin: 0 0 ${tokens.space.sm} 0;
@@ -182,33 +182,33 @@ const IntensitySlider = styled.div`
 `
 
 const IntensityOption = styled(motion.button)<{ isSelected: boolean }>`
-  background: ${({ theme, isSelected }) => 
-    isSelected 
+  background: ${({ theme, isSelected }) =>
+    isSelected
       ? `linear-gradient(135deg, ${theme.color.pet.primary}, ${theme.color.warm.medium})`
       : theme.color.bg};
-  color: ${({ theme, isSelected }) => 
+  color: ${({ theme, isSelected }) =>
     isSelected ? 'white' : theme.color.text};
-  border: 3px solid ${({ theme, isSelected }) => 
+  border: 3px solid ${({ theme, isSelected }) =>
     isSelected ? theme.color.pet.primary : theme.color.border};
   border-radius: ${tokens.radius.button};
   padding: ${tokens.space.md} ${tokens.space.lg};
   min-height: 44px;
   font-size: ${tokens.typography.fontSize.sm};
-  
+
   @media (max-width: 480px) {
     padding: ${tokens.space.sm} ${tokens.space.md};
     min-height: 40px;
     font-size: ${tokens.typography.fontSize.xs};
   }
-  font-weight: ${({ isSelected }) => 
+  font-weight: ${({ isSelected }) =>
     isSelected ? tokens.typography.fontWeight.semibold : tokens.typography.fontWeight.medium};
   font-family: ${tokens.typography.fontFamily.primary};
   cursor: pointer;
   transition: all ${tokens.motion.fast} ${tokens.motion.easing};
   position: relative;
   overflow: hidden;
-  box-shadow: ${({ theme, isSelected }) => 
-    isSelected 
+  box-shadow: ${({ theme, isSelected }) =>
+    isSelected
       ? `0 4px 12px ${theme.color.pet.primary}40`
       : `0 2px 6px ${theme.color.border}20`};
 
@@ -225,8 +225,8 @@ const IntensityOption = styled(motion.button)<{ isSelected: boolean }>`
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: ${({ theme, isSelected }) => 
-      isSelected 
+    box-shadow: ${({ theme, isSelected }) =>
+      isSelected
         ? `0 6px 16px ${theme.color.pet.primary}50`
         : `0 4px 12px ${theme.color.border}30`};
 
@@ -238,7 +238,7 @@ const IntensityOption = styled(motion.button)<{ isSelected: boolean }>`
   &:active {
     transform: translateY(0);
   }
-  
+
   flex: 1;
   margin: 0 ${tokens.space.xs};
   min-width: 0;
@@ -274,18 +274,18 @@ const ChipsContainer = styled.div`
 `
 
 const Chip = styled(motion.button)<{ isSelected: boolean }>`
-  background: ${({ theme, isSelected }) => 
-    isSelected 
+  background: ${({ theme, isSelected }) =>
+    isSelected
       ? `linear-gradient(135deg, ${theme.color.pet.accent}15, ${theme.color.warm.medium}15)`
       : theme.color.bg};
-  color: ${({ theme, isSelected }) => 
+  color: ${({ theme, isSelected }) =>
     isSelected ? theme.color.pet.accent : theme.color.text};
-  border: 2px solid ${({ theme, isSelected }) => 
+  border: 2px solid ${({ theme, isSelected }) =>
     isSelected ? theme.color.pet.accent : theme.color.border};
   border-radius: ${tokens.radius.button};
   padding: ${tokens.space.sm} ${tokens.space.md};
   font-size: ${tokens.typography.fontSize.sm};
-  font-weight: ${({ isSelected }) => 
+  font-weight: ${({ isSelected }) =>
     isSelected ? tokens.typography.fontWeight.semibold : tokens.typography.fontWeight.normal};
   font-family: ${tokens.typography.fontFamily.primary};
   cursor: pointer;
@@ -305,15 +305,15 @@ const Chip = styled(motion.button)<{ isSelected: boolean }>`
   }
 
   &:hover {
-    background: ${({ theme, isSelected }) => 
-      isSelected 
+    background: ${({ theme, isSelected }) =>
+      isSelected
         ? `linear-gradient(135deg, ${theme.color.pet.accent}25, ${theme.color.warm.medium}25)`
         : theme.color.surface};
-    border-color: ${({ theme, isSelected }) => 
+    border-color: ${({ theme, isSelected }) =>
       isSelected ? theme.color.pet.accent : theme.color.pet.accent};
     transform: translateY(-1px);
-    box-shadow: ${({ theme, isSelected }) => 
-      isSelected 
+    box-shadow: ${({ theme, isSelected }) =>
+      isSelected
         ? `0 4px 12px ${theme.color.pet.accent}30`
         : `0 2px 8px ${theme.color.border}40`};
 
@@ -355,24 +355,24 @@ const NoteTextarea = styled.textarea`
   }
 `
 
-// Pet reaction section
-const PetReactionSection = styled(motion.div)`
-  background: linear-gradient(135deg, ${({ theme }) => theme.color.warm.light}10, ${({ theme }) => theme.color.pet.accent}10);
-  border: 2px solid ${({ theme }) => theme.color.pet.accent}40;
-  border-radius: ${tokens.radius.card};
-  padding: ${tokens.space.lg};
-  margin-bottom: ${tokens.space.lg};
-  text-align: center;
-`
+// Pet reaction section - temporarily disabled
+// const PetReactionSection = styled(motion.div)`
+//   background: linear-gradient(135deg, ${({ theme }) => theme.color.warm.light}10, ${({ theme }) => theme.color.pet.accent}10);
+//   border: 2px solid ${({ theme }) => theme.color.pet.accent}40;
+//   border-radius: ${tokens.radius.card};
+//   padding: ${tokens.space.lg};
+//   margin-bottom: ${tokens.space.lg};
+//   text-align: center;
+// `
 
-const PetReactionText = styled.p`
-  font-size: ${tokens.typography.fontSize.lg};
-  font-weight: ${tokens.typography.fontWeight.medium};
-  color: ${({ theme }) => theme.color.text};
-  margin: 0 0 ${tokens.space.md} 0;
-  font-family: ${tokens.typography.fontFamily.primary};
-  line-height: ${tokens.typography.lineHeight.relaxed};
-`
+// const PetReactionText = styled.p`
+//   font-size: ${tokens.typography.fontSize.lg};
+//   font-weight: ${tokens.typography.fontWeight.medium};
+//   color: ${({ theme }) => theme.color.text};
+//   margin: 0 0 ${tokens.space.md} 0;
+//   font-family: ${tokens.typography.fontFamily.primary};
+//   line-height: ${tokens.typography.lineHeight.relaxed};
+// `
 
 const PetButton = styled(motion.button)`
   background: ${({ theme }) => theme.color.pet.primary};
@@ -455,14 +455,14 @@ interface EmotionalDiaryProps {
   showShareCard?: boolean
 }
 
-export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
+export const EmotionalDiary: React.FC<EmotionalDiaryProps> = React.memo(({
   onSaveEntry,
   showShareCard = true,
 }) => {
   const {
     addEntry,
     getPrompt,
-    getPetReaction,
+    // getPetReaction, // Temporarily disabled
     getTodayEntries,
     isLoading
   } = useJournal()
@@ -498,9 +498,9 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
       setSelectedChips([])
       return
     }
-    
-    setSelectedChips(prev => 
-      prev.includes(chip) 
+
+    setSelectedChips(prev =>
+      prev.includes(chip)
         ? prev.filter(c => c !== chip)
         : [...prev, chip]
     )
@@ -516,7 +516,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
     try {
       const entry = addEntry(
         selectedMood,
-        selectedIntensity || undefined,
+        selectedIntensity ?? undefined,
         note.trim() || undefined,
         selectedChips.length > 0 ? selectedChips : undefined
       )
@@ -545,7 +545,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
     } finally {
       setIsSaving(false)
     }
-  }, [selectedMood, selectedIntensity, note, selectedChips, addEntry, getPetReaction, onSaveEntry])
+  }, [selectedMood, selectedIntensity, note, selectedChips, addEntry, onSaveEntry])
 
   // Get prompt when mood is selected
   useEffect(() => {
@@ -557,9 +557,9 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp)
-    return date.toLocaleDateString('ru-RU', { 
-      day: '2-digit', 
-      month: '2-digit' 
+    return date.toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit'
     })
   }
 
@@ -634,7 +634,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             <PromptTitle>{currentPrompt.text}</PromptTitle>
-            
+
             {currentPrompt.chips && (
               <ChipsContainer>
                 {currentPrompt.chips.map((chip: string) => (
@@ -715,7 +715,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
               <HistoryDate>{formatDate(entry.ts)}</HistoryDate>
               <HistoryEmotion>{MOOD_ICONS[entry.mood]}</HistoryEmotion>
               <HistoryText>
-                {entry.note || entry.chips?.join(', ') || 'запись без заметки'}
+                {entry.note ?? entry.chips?.join(', ') ?? 'запись без заметки'}
               </HistoryText>
             </HistoryItem>
           ))}
@@ -730,4 +730,6 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = ({
       )}
     </DiaryContainer>
   )
-}
+})
+
+EmotionalDiary.displayName = 'EmotionalDiary'

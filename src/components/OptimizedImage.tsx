@@ -52,14 +52,14 @@ const LoadingSpinner = styled.div`
   border-top: 2px solid ${({ theme }) => theme.color.accent};
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  
+
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
 `
 
-export const OptimizedImage: React.FC<OptimizedImageProps> = ({
+export const OptimizedImage: React.FC<OptimizedImageProps> = React.memo(({
   src,
   alt,
   width,
@@ -124,17 +124,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onError={handleError}
         />
       )}
-      
+
       <Placeholder loaded={loaded && !error}>
         {error ? (
-          placeholder || 'Ошибка загрузки'
+          placeholder ?? 'Ошибка загрузки'
         ) : (
           <LoadingSpinner />
         )}
       </Placeholder>
     </ImageContainer>
   )
-}
+})
+
+OptimizedImage.displayName = 'OptimizedImage'
 
 // Hook for image preloading
 export const useImagePreload = (src: string) => {
@@ -221,14 +223,16 @@ export const ResponsiveImage: React.FC<OptimizedImageProps & {
           onError={handleError}
         />
       )}
-      
+
       <Placeholder loaded={loaded && !error}>
         {error ? (
-          placeholder || 'Ошибка загрузки'
+          placeholder ?? 'Ошибка загрузки'
         ) : (
           <LoadingSpinner />
         )}
       </Placeholder>
     </ImageContainer>
   )
-}
+})
+
+OptimizedImage.displayName = 'OptimizedImage'

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Ritual, RitualSettings, BreathingMode } from '../types/rituals'
 import { tokens } from '../design/tokens'
 import { playButtonClick } from '../utils/sounds'
-import { BottomSheet } from './BottomSheet'
+// import { BottomSheet } from './BottomSheet' // Убираем, так как BottomSheet должен управляться извне
 import { ActionBar } from './ActionBar'
 import { BREATHING_MODES } from '../data/ritualsData'
 
@@ -13,15 +13,15 @@ const PreviewContent = styled.div`
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  
+
   @media (max-width: 480px) {
     padding: ${tokens.space.sm};
   }
-  
+
   @media (max-width: 360px) {
     padding: ${tokens.space.xs};
   }
-  
+
   @media (max-width: 320px) {
     padding: 8px;
   }
@@ -31,11 +31,11 @@ const PreviewHeader = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: ${tokens.space.md};
-  
+
   @media (max-width: 480px) {
     margin-bottom: ${tokens.space.sm};
   }
-  
+
   @media (max-width: 360px) {
     margin-bottom: ${tokens.space.xs};
   }
@@ -44,12 +44,12 @@ const PreviewHeader = styled.div`
 const PreviewIcon = styled.div`
   font-size: 32px;
   margin-right: ${tokens.space.sm};
-  
+
   @media (max-width: 480px) {
     font-size: 28px;
     margin-right: ${tokens.space.xs};
   }
-  
+
   @media (max-width: 360px) {
     font-size: 24px;
   }
@@ -62,11 +62,11 @@ const PreviewTitle = styled.h2`
   color: ${({ theme }) => theme.color.text};
   margin: 0;
   line-height: ${tokens.typography.lineHeight.tight};
-  
+
   @media (max-width: 480px) {
     font-size: ${tokens.typography.fontSize.base};
   }
-  
+
   @media (max-width: 360px) {
     font-size: ${tokens.typography.fontSize.sm};
   }
@@ -80,12 +80,12 @@ const PreviewDescription = styled.p`
   margin: ${tokens.space.xs} 0 ${tokens.space.md} 0;
   line-height: ${tokens.typography.lineHeight.relaxed};
   text-align: center;
-  
+
   @media (max-width: 480px) {
     font-size: ${tokens.typography.fontSize.xs};
     margin: ${tokens.space.xs} 0 ${tokens.space.sm} 0;
   }
-  
+
   @media (max-width: 360px) {
     font-size: ${tokens.typography.fontSize.xs};
     margin: 4px 0 ${tokens.space.xs} 0;
@@ -105,19 +105,19 @@ const BreathingModeSelector = styled.div`
   justify-content: center;
   box-sizing: border-box;
   min-width: 0;
-  
+
   @media (max-width: 480px) {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 8px;
     margin-bottom: 16px;
   }
-  
+
   @media (max-width: 360px) {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 6px;
     margin-bottom: 12px;
   }
-  
+
   @media (max-width: 320px) {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 4px;
@@ -131,9 +131,9 @@ const BreathingModeButton = styled(motion.button).withConfig({
   min-width: 0;
   border-radius: 14px;
   padding: 12px;
-  background: ${({ $isSelected, theme }) => 
+  background: ${({ $isSelected, theme }) =>
     $isSelected ? theme.color.pet.primary : '#f7f7f7'};
-  color: ${({ $isSelected, theme }) => 
+  color: ${({ $isSelected, theme }) =>
     $isSelected ? '#ffffff' : theme.color.text};
   font-size: 15px;
   font-weight: 500;
@@ -153,37 +153,37 @@ const BreathingModeButton = styled(motion.button).withConfig({
   box-sizing: border-box;
   overflow: hidden;
   border: none;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   @media (max-width: 480px) {
     padding: 10px;
     height: 70px;
     font-size: 14px;
     border-radius: 12px;
   }
-  
+
   @media (max-width: 360px) {
     padding: 8px;
     height: 65px;
     font-size: 13px;
     border-radius: 10px;
   }
-  
+
   @media (max-width: 320px) {
     padding: 6px;
     height: 60px;
     font-size: 12px;
     border-radius: 8px;
   }
-  
+
   @media (max-height: 640px) {
     padding: 10px;
     height: 65px;
@@ -199,15 +199,15 @@ const BreathingModeName = styled.div`
   word-break: break-word;
   hyphens: auto;
   font-size: 16px;
-  
+
   @media (max-width: 480px) {
     font-size: 15px;
   }
-  
+
   @media (max-width: 360px) {
     font-size: 14px;
   }
-  
+
   @media (max-width: 320px) {
     font-size: 13px;
   }
@@ -221,15 +221,15 @@ const BreathingModeDescription = styled.div`
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
-  
+
   @media (max-width: 480px) {
     font-size: 0.8rem;
   }
-  
+
   @media (max-width: 360px) {
     font-size: 0.75rem;
   }
-  
+
   @media (max-width: 320px) {
     font-size: 0.7rem;
   }
@@ -251,7 +251,7 @@ export const RitualPreview: React.FC<RitualPreviewProps> = ({
   settings,
   onStart,
   onClose,
-  onModeChange,
+  _onModeChange,
   onBreathingModeChange
 }) => {
 
@@ -274,46 +274,43 @@ export const RitualPreview: React.FC<RitualPreviewProps> = ({
   )
 
   return (
-    <BottomSheet
-      isOpen={true}
-      onClose={onClose}
-      title={ritual.title}
-      subtitle={settings.mode === 'guided' ? ritual.description : ritual.quickDescription}
-      actionBar={actionBar}
-    >
-      <PreviewContent>
-        <PreviewHeader>
-          <PreviewIcon>{ritual.icon}</PreviewIcon>
-          <PreviewTitle>{ritual.title}</PreviewTitle>
-        </PreviewHeader>
+    <PreviewContent>
+      <PreviewHeader>
+        <PreviewIcon>{ritual.icon}</PreviewIcon>
+        <PreviewTitle>{ritual.title}</PreviewTitle>
+      </PreviewHeader>
 
+      <PreviewDescription>
+        {settings.mode === 'guided' ? ritual.description : ritual.quickDescription}
+      </PreviewDescription>
 
-        {ritual.id === 'breath' && (
-          <>
-            <PreviewDescription>
-              Выберите технику дыхания для начала упражнения
-            </PreviewDescription>
-            <BreathingModeSelector>
-              {Object.entries(BREATHING_MODES).map(([mode, info]) => (
-                <BreathingModeButton
-                  key={mode}
-                  $isSelected={settings.breathingMode === mode}
-                  onClick={() => {
-                    onBreathingModeChange?.(mode as BreathingMode)
-                    playButtonClick()
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.1 }}
-                >
-                  <BreathingModeName>{info.name}</BreathingModeName>
-                  <BreathingModeDescription>{info.description}</BreathingModeDescription>
-                </BreathingModeButton>
-              ))}
-            </BreathingModeSelector>
-          </>
-        )}
-      </PreviewContent>
-    </BottomSheet>
+      {ritual.id === 'breath' && (
+        <>
+          <PreviewDescription>
+            Выберите технику дыхания для начала упражнения
+          </PreviewDescription>
+          <BreathingModeSelector>
+            {Object.entries(BREATHING_MODES).map(([mode, info]) => (
+              <BreathingModeButton
+                key={mode}
+                $isSelected={settings.breathingMode === mode}
+                onClick={() => {
+                  onBreathingModeChange?.(mode as BreathingMode)
+                  playButtonClick()
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.1 }}
+              >
+                <BreathingModeName>{info.name}</BreathingModeName>
+                <BreathingModeDescription>{info.description}</BreathingModeDescription>
+              </BreathingModeButton>
+            ))}
+          </BreathingModeSelector>
+        </>
+      )}
+
+      {actionBar}
+    </PreviewContent>
   )
 }

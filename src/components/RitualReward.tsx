@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
-import { Ritual, RitualReflection } from '../types/rituals'
+import { Ritual } from '../types/rituals'
+// import { RitualReflection } from '../types/rituals' // Temporarily unused
 import { tokens } from '../design/tokens'
 import { playRitualComplete } from '../utils/sounds'
 
@@ -57,23 +58,24 @@ const LeafAnimation = styled(motion.div)`
   transform: rotate(45deg);
 `
 
-const PetReaction = styled(motion.div)`
-  background: ${({ theme }) => theme.color.surface};
-  border: 2px solid ${({ theme }) => theme.color.pet.accent};
-  border-radius: ${tokens.radius.card};
-  padding: ${tokens.space.lg};
-  margin-top: ${tokens.space.lg};
-  position: relative;
-  overflow: hidden;
-`
+// Temporarily unused styled components
+// const PetReaction = styled(motion.div)`
+//   background: ${({ theme }) => theme.color.surface};
+//   border: 2px solid ${({ theme }) => theme.color.pet.accent};
+//   border-radius: ${tokens.radius.card};
+//   padding: ${tokens.space.lg};
+//   margin-top: ${tokens.space.lg};
+//   position: relative;
+//   overflow: hidden;
+// `
 
-const PetMessage = styled.div`
-  font-size: ${tokens.typography.fontSize.base};
-  font-weight: ${tokens.typography.fontWeight.medium};
-  font-family: ${tokens.typography.fontFamily.primary};
-  color: ${({ theme }) => theme.color.text};
-  line-height: ${tokens.typography.lineHeight.relaxed};
-`
+// const PetMessage = styled.div`
+//   font-size: ${tokens.typography.fontSize.base};
+//   font-weight: ${tokens.typography.fontWeight.medium};
+//   font-family: ${tokens.typography.fontFamily.primary};
+//   color: ${({ theme }) => theme.color.text};
+//   line-height: ${tokens.typography.lineHeight.relaxed};
+// `
 
 const ProgressUpdate = styled(motion.div)`
   background: ${({ theme }) => theme.color.pet.primary}20;
@@ -98,7 +100,7 @@ export const RitualReward: React.FC<RitualRewardProps> = ({
 }) => {
   useEffect(() => {
     playRitualComplete()
-    
+
     // Auto-advance after 3 seconds
     const timer = setTimeout(() => {
       onComplete()
@@ -111,17 +113,18 @@ export const RitualReward: React.FC<RitualRewardProps> = ({
     return 'Отлично! Ты молодец! ✨'
   }
 
-  const getPetMessage = () => {
-    const messages = {
-      breath: 'Дыхание — это основа спокойствия. Ты делаешь правильно.',
-      water: 'Вода — это жизнь. Твоё тело благодарно.',
-      stretch: 'Растяжка помогает телу расслабиться. Продолжай!',
-      gratitude: 'Благодарность делает сердце теплее. Это прекрасно.',
-      walk: 'Прогулка — это подарок себе. Ты заслуживаешь это.',
-      kindness: 'Доброта возвращается. Ты делаешь мир лучше.'
-    }
-    return messages[ritual.id as keyof typeof messages] || 'Ты молодец!'
-  }
+  // Temporarily unused function
+  // const getPetMessage = () => {
+  //   const messages = {
+  //     breath: 'Дыхание — это основа спокойствия. Ты делаешь правильно.',
+  //     water: 'Вода — это жизнь. Твоё тело благодарно.',
+  //     stretch: 'Растяжка помогает телу расслабиться. Продолжай!',
+  //     gratitude: 'Благодарность делает сердце теплее. Это прекрасно.',
+  //     walk: 'Прогулка — это подарок себе. Ты заслуживаешь это.',
+  //     kindness: 'Доброта возвращается. Ты делаешь мир лучше.'
+  //   }
+  //   return messages[ritual.id as keyof typeof messages] || 'Ты молодец!'
+  // }
 
   const getRewardIcon = () => {
     return '🌱'
@@ -138,11 +141,10 @@ export const RitualReward: React.FC<RitualRewardProps> = ({
         <RewardIcon
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ 
-            type: 'spring', 
-            damping: 15, 
-            stiffness: 200,
-            delay: 0.2 
+          transition={{
+            duration: 0.3,
+            ease: 'easeOut',
+            delay: 0.2
           }}
         >
           {getRewardIcon()}
@@ -186,20 +188,20 @@ export const RitualReward: React.FC<RitualRewardProps> = ({
         {[...Array(5)].map((_, i) => (
           <LeafAnimation
             key={i}
-            initial={{ 
-              x: Math.random() * 400 - 200, 
-              y: 100, 
+            initial={{
+              x: Math.random() * 400 - 200,
+              y: 100,
               opacity: 0,
               scale: 0
             }}
-            animate={{ 
-              x: Math.random() * 400 - 200, 
-              y: -100, 
+            animate={{
+              x: Math.random() * 400 - 200,
+              y: -100,
               opacity: [0, 1, 0],
               scale: [0, 1, 0],
               rotate: [0, 360]
             }}
-            transition={{ 
+            transition={{
               duration: 3,
               delay: i * 0.2,
               ease: 'easeOut'

@@ -33,8 +33,8 @@ const LoadingText = styled.p`
   text-align: center;
 `
 
-export const LoadingSpinner: React.FC<{ message?: string }> = ({ 
-  message = 'Загружаем...' 
+export const LoadingSpinner: React.FC<{ message?: string }> = React.memo(({
+  message = 'Загружаем...'
 }) => {
   return (
     <SpinnerContainer>
@@ -42,5 +42,7 @@ export const LoadingSpinner: React.FC<{ message?: string }> = ({
       <LoadingText>{message}</LoadingText>
     </SpinnerContainer>
   )
-}
+})
+
+LoadingSpinner.displayName = 'LoadingSpinner'
 

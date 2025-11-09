@@ -43,7 +43,7 @@ const SettingLabel = styled.label`
 const ToggleSwitch = styled.div<{ $isOn: boolean }>`
   width: 44px;
   height: 24px;
-  background: ${({ theme, $isOn }) => 
+  background: ${({ theme, $isOn }) =>
     $isOn ? theme.color.pet.primary : theme.color.border};
   border-radius: 12px;
   position: relative;
@@ -85,8 +85,8 @@ const VolumeSliderTrack = styled.div<{ $progress: number }>`
   left: 0;
   height: 100%;
   width: ${({ $progress }) => $progress}%;
-  background: linear-gradient(90deg, 
-    ${({ theme }) => theme.color.pet.primary} 0%, 
+  background: linear-gradient(90deg,
+    ${({ theme }) => theme.color.pet.primary} 0%,
     ${({ theme }) => theme.color.warm.medium} 100%
   );
   border-radius: 4px;
@@ -163,7 +163,7 @@ interface SoundSettingsProps {
   className?: string
 }
 
-export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
+export const SoundSettings: React.FC<SoundSettingsProps> = React.memo(({ className }) => {
   const [soundsEnabled, setSoundsEnabled] = useState(true)
   const [ambientEnabled, setAmbientEnabled] = useState(false)
   const [soundVolume, setSoundVolume] = useState(30)
@@ -215,7 +215,7 @@ export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
   const handleAmbientToggle = async (enabled: boolean) => {
     setAmbientEnabled(enabled)
     localStorage.setItem('gropy-ambient-enabled', enabled.toString())
-    
+
     if (enabled) {
       await ambientManager.startAmbient()
     } else {
@@ -227,7 +227,7 @@ export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
     setSoundVolume(volume)
     soundManager.setVolume(volume / 100)
     localStorage.setItem('gropy-sound-volume', volume.toString())
-    
+
     // Play sound feedback when adjusting volume
     if (soundsEnabled) {
       playButtonClick()
@@ -238,7 +238,7 @@ export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
     setAmbientVolume(volume)
     ambientManager.setVolume(volume / 100)
     localStorage.setItem('gropy-ambient-volume', volume.toString())
-    
+
     // Play sound feedback when adjusting volume
     if (soundsEnabled) {
       playButtonClick()
@@ -254,14 +254,14 @@ export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
   return (
     <SettingsContainer className={className}>
       <SettingsTitle>звуки и атмосфера</SettingsTitle>
-      
+
       {soundsEnabled && (
         <SettingRow>
           <SettingLabel>
             <span>🎵</span>
             тест звука
           </SettingLabel>
-          <button 
+          <button
             onClick={testSound}
             style={{
               background: 'transparent',
@@ -294,13 +294,13 @@ export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
           </button>
         </SettingRow>
       )}
-      
+
       <SettingRow>
         <SettingLabel>
           <span>🔊</span>
           звуки действий
         </SettingLabel>
-        <ToggleSwitch 
+        <ToggleSwitch
           $isOn={soundsEnabled}
           onClick={() => handleSoundsToggle(!soundsEnabled)}
         />
@@ -311,7 +311,7 @@ export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
           <span>🌿</span>
           фоновые звуки
         </SettingLabel>
-        <ToggleSwitch 
+        <ToggleSwitch
           $isOn={ambientEnabled}
           onClick={() => handleAmbientToggle(!ambientEnabled)}
         />
@@ -362,4 +362,6 @@ export const SoundSettings: React.FC<SoundSettingsProps> = ({ className }) => {
       )}
     </SettingsContainer>
   )
-}
+})
+
+SoundSettings.displayName = 'SoundSettings'

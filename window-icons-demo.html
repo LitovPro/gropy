@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Window Icons Demo - Calm Design</title>
+    <style>
+        body {
+            background-color: #F5F3EE;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            max-width: 800px;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            width: 100%;
+        }
+
+        .icon-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(167, 199, 183, 0.2);
+        }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            transition: transform 0.3s ease;
+        }
+
+        .icon:hover {
+            transform: scale(1.05);
+        }
+
+        .icon-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #6B7280;
+            text-align: center;
+        }
+
+        .icon-description {
+            font-size: 14px;
+            color: #9CA3AF;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        h1 {
+            color: #374151;
+            font-size: 28px;
+            font-weight: 300;
+            margin: 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #6B7280;
+            font-size: 16px;
+            font-weight: 400;
+            margin: 8px 0 0 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>Window Icons</h1>
+            <p class="subtitle">Calm Design / Soft Minimalism / Japanese Zen</p>
+        </div>
+
+        <div class="icon-grid">
+            <div class="icon-card">
+                <img src="public/window-icon.svg" alt="Window Icon" class="icon">
+                <div class="icon-title">Classic Window</div>
+                <div class="icon-description">Traditional window frame with open shutters and leaf</div>
+            </div>
+
+            <div class="icon-card">
+                <img src="public/window-icon-soft.svg" alt="Soft Window Icon" class="icon">
+                <div class="icon-title">Soft Window</div>
+                <div class="icon-description">Rounded corners and curved shutters for gentle feel</div>
+            </div>
+
+            <div class="icon-card">
+                <img src="public/window-icon-zen.svg" alt="Zen Window Icon" class="icon">
+                <div class="icon-title">Zen Window</div>
+                <div class="icon-description">Minimalist approach with essential elements only</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

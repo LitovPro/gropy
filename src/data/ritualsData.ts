@@ -247,18 +247,6 @@ export const RITUALS: Ritual[] = [
     reflectionPrompt: 'Заметил ли что-то приятное?',
     reflectionOptions: ['природа', 'люди', 'тишина', 'свет']
   },
-  {
-    id: 'kindness',
-    title: 'Доброта',
-    description: 'Одно доброе дело',
-    icon: '💝',
-    category: 'kindness',
-    type: 'daily', // Once per day
-    defaultDuration: 0, // Action-based
-    quickDescription: 'Выбери идею и выполни',
-    reflectionPrompt: 'Что сделал доброго?',
-    reflectionOptions: ['помог', 'улыбнулся', 'поблагодарил', 'выслушал']
-  },
   // Home care rituals
   {
     id: 'ventilate',

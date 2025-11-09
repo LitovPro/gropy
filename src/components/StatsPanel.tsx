@@ -95,7 +95,7 @@ interface StatsPanelProps {
   totalPoints: number
 }
 
-export const StatsPanel: React.FC<StatsPanelProps> = ({
+export const StatsPanel: React.FC<StatsPanelProps> = React.memo(({
   level,
   experience,
   expForNextLevel,
@@ -132,7 +132,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({
   return (
     <StatsContainer>
       <StatsTitle>Статистика</StatsTitle>
-      
+
       <StatsGrid>
         {stats.map((stat, index) => (
           <StatCard
@@ -171,4 +171,6 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({
       </StatCard>
     </StatsContainer>
   )
-}
+})
+
+StatsPanel.displayName = 'StatsPanel'

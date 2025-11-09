@@ -22,6 +22,20 @@
     --anim-fast: 0ms;
     --anim-base: 0ms;
   }
+
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .tile,
+  .cta,
+  .fab,
+  .tab-button {
+    transition: none !important;
+  }
 }
 
 /* Safe area utilities */
@@ -197,7 +211,7 @@
   .action-bar {
     border-top: 2px solid var(--text, #000000);
   }
-  
+
   .fab {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }

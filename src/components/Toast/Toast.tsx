@@ -72,7 +72,7 @@ interface ToastProps {
   onHide: (id: string) => void
 }
 
-export const Toast: React.FC<ToastProps> = ({ toasts, onHide }) => {
+export const Toast: React.FC<ToastProps> = React.memo(({ toasts, onHide }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && toasts.length > 0) {
@@ -92,9 +92,9 @@ export const Toast: React.FC<ToastProps> = ({ toasts, onHide }) => {
         {toasts.map(toast => (
           <ToastItem
             key={toast.id}
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             role="alert"
             aria-live="polite"
@@ -111,7 +111,9 @@ export const Toast: React.FC<ToastProps> = ({ toasts, onHide }) => {
     </ToastContainer>,
     document.body
   )
-}
+})
+
+Toast.displayName = 'Toast'
 
 
 

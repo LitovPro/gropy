@@ -46,7 +46,7 @@ const ThemesGrid = styled.div`
 const ThemePreview = styled.button<{ $isActive: boolean }>`
   aspect-ratio: 3/2;
   border-radius: ${tokens.radius.card};
-  border: 2px solid ${({ $isActive, theme }) => 
+  border: 2px solid ${({ $isActive, theme }) =>
     $isActive ? theme.color.accent : theme.color.border};
   cursor: pointer;
   position: relative;
@@ -114,9 +114,9 @@ const CheckIcon = styled.div<{ $isActive: boolean }>`
   right: 4px;
   width: 16px;
   height: 16px;
-  background: ${({ $isActive, theme }) => 
+  background: ${({ $isActive, theme }) =>
     $isActive ? theme.color.accent : 'transparent'};
-  border: 2px solid ${({ $isActive, theme }) => 
+  border: 2px solid ${({ $isActive, theme }) =>
     $isActive ? theme.color.accent : theme.color.border};
   border-radius: 50%;
   display: flex;
@@ -153,11 +153,11 @@ const Button = styled.button<{ $variant: 'primary' | 'secondary' | 'danger' }>`
         return `
           background: ${theme.color.accent};
           color: white;
-          
+
           &:hover {
             opacity: 0.9;
           }
-          
+
           &:active {
             transform: scale(0.98);
           }
@@ -167,11 +167,11 @@ const Button = styled.button<{ $variant: 'primary' | 'secondary' | 'danger' }>`
           background: ${theme.color.surface};
           color: ${theme.color.textMuted};
           border: 1px solid ${theme.color.border};
-          
+
           &:hover {
             background: ${theme.color.bg};
           }
-          
+
           &:active {
             transform: scale(0.98);
           }
@@ -184,7 +184,7 @@ const Button = styled.button<{ $variant: 'primary' | 'secondary' | 'danger' }>`
           font-weight: 600;
           position: relative;
           overflow: hidden;
-          
+
           &::before {
             content: '';
             position: absolute;
@@ -195,35 +195,35 @@ const Button = styled.button<{ $variant: 'primary' | 'secondary' | 'danger' }>`
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: left 0.5s;
           }
-          
+
           &:hover {
             background: #B91C1C;
             border-color: #991B1B;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-            
+
             &::before {
               left: 100%;
             }
           }
-          
+
           &:active {
             transform: translateY(0);
             box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
           }
-          
+
           &:disabled {
             background: #9CA3AF;
             border-color: #6B7280;
             color: #D1D5DB;
             cursor: not-allowed;
-            transform: none;
+            transform: translateY(0);
             box-shadow: none;
-            
+
             &:hover {
               background: #9CA3AF;
               border-color: #6B7280;
-              transform: none;
+              transform: translateY(0);
               box-shadow: none;
             }
           }
@@ -296,7 +296,7 @@ interface ProfileSectionProps {
   onResetAll: () => void
 }
 
-export const ProfileSection: React.FC<ProfileSectionProps> = ({
+export const ProfileSection: React.FC<ProfileSectionProps> = React.memo(({
   onExportData,
   onImportData,
   onResetAll,
@@ -333,7 +333,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
     } else {
       const newAttempts = resetAttempts + 1
       setResetAttempts(newAttempts)
-      
+
       if (newAttempts >= 3) {
         // Block for 5 minutes
         setBlockUntil(Date.now() + 5 * 60 * 1000)
@@ -354,7 +354,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
           setResetAttempts(0)
         }
       }, 1000)
-      
+
       return () => clearInterval(timer)
     }
   }, [blockUntil, timeLeft])
@@ -397,7 +397,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
         <DangerText>
           Сброс всех данных. Это действие нельзя отменить.
         </DangerText>
-        
+
         <AnimatePresence>
           {showDangerZone ? (
             <motion.div
@@ -420,7 +420,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
               )}
               {isBlocked && (
                 <DangerText style={{ fontSize: '12px', marginTop: '8px' }}>
-                  {timeLeft > 0 
+                  {timeLeft > 0
                     ? `Слишком много попыток. Попробуйте через ${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`
                     : 'Слишком много попыток. Попробуйте позже.'
                   }
@@ -447,4 +447,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
       </DangerZone>
     </ProfileContainer>
   )
-}
+})
+
+ProfileSection.displayName = 'ProfileSection'

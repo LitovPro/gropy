@@ -50,11 +50,11 @@ const FeelingOption = styled(motion.button).withConfig({
 })<{ $isSelected: boolean }>`
   width: 60px;
   height: 60px;
-  border: 3px solid ${({ theme, $isSelected }) => 
+  border: 3px solid ${({ theme, $isSelected }) =>
     $isSelected ? theme.color.pet.primary : theme.color.border};
   border-radius: 50%;
-  background: ${({ theme, $isSelected }) => 
-    $isSelected 
+  background: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `linear-gradient(135deg, ${theme.color.pet.primary}20, ${theme.color.warm.medium}20)`
       : theme.color.bg};
   font-size: 24px;
@@ -172,7 +172,7 @@ export const RitualReflection: React.FC<RitualReflectionProps> = ({
     >
       <ReflectionContent>
         <ReflectionTitle>
-          {ritual.reflectionPrompt || 'Как прошло?'}
+          {ritual.reflectionPrompt ?? 'Как прошло?'}
         </ReflectionTitle>
 
         <FeelingOptions>

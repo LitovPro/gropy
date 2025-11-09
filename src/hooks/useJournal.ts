@@ -86,16 +86,16 @@ export const useJournal = () => {
   // Get prompt for mood
   const getPrompt = useCallback((mood: Mood): Prompt | null => {
     // Filter prompts that match the mood and haven't been used recently
-    const availablePrompts = PROMPTS.filter(prompt => 
-      prompt.moods.includes(mood) && 
+    const availablePrompts = PROMPTS.filter(prompt =>
+      prompt.moods.includes(mood) &&
       !state.lastPromptIds.includes(prompt.id)
     )
 
     // If no available prompts, use any prompt for this mood
     const fallbackPrompts = PROMPTS.filter(prompt => prompt.moods.includes(mood))
-    
+
     const promptsToChoose = availablePrompts.length > 0 ? availablePrompts : fallbackPrompts
-    
+
     if (promptsToChoose.length === 0) return null
 
     // Random selection
@@ -104,12 +104,12 @@ export const useJournal = () => {
 
     // Update last used prompts (keep only last 5)
     const newLastPromptIds = [selectedPrompt.id, ...state.lastPromptIds].slice(0, 5)
-    
+
     const newState = {
       ...state,
       lastPromptIds: newLastPromptIds
     }
-    
+
     saveState(newState)
     return selectedPrompt
   }, [state, saveState])
@@ -117,13 +117,13 @@ export const useJournal = () => {
   // Get ritual for mood
   const getRitual = useCallback((mood: Mood): Ritual | null => {
     // Filter rituals that haven't been used recently
-    const availableRituals = RITUALS.filter(ritual => 
+    const availableRituals = RITUALS.filter(ritual =>
       !state.lastRitualIds.includes(ritual.id)
     )
 
     // If no available rituals, use any ritual
     const ritualsToChoose = availableRituals.length > 0 ? availableRituals : RITUALS
-    
+
     if (ritualsToChoose.length === 0) return null
 
     // Prioritize rituals with mood bias
@@ -137,12 +137,12 @@ export const useJournal = () => {
 
     // Update last used rituals (keep only last 3)
     const newLastRitualIds = [selectedRitual.id, ...state.lastRitualIds].slice(0, 3)
-    
+
     const newState = {
       ...state,
       lastRitualIds: newLastRitualIds
     }
-    
+
     saveState(newState)
     return selectedRitual
   }, [state, saveState])
@@ -151,8 +151,8 @@ export const useJournal = () => {
   const getPetReaction = useCallback((mood: Mood, seed?: number): string => {
     const reactions = PET_REACTIONS[mood]
     if (!reactions || reactions.length === 0) return 'спасибо, что поделился(ась) со мной 💚'
-    
-    const index = Math.floor((seed || Math.random()) * reactions.length)
+
+    const index = Math.floor((seed ?? Math.random()) * reactions.length)
     return reactions[index]
   }, [])
 
@@ -161,7 +161,7 @@ export const useJournal = () => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const todayStart = today.getTime()
-    
+
     return state.entries.filter(entry => entry.ts >= todayStart)
   }, [state.entries])
 
@@ -190,7 +190,7 @@ export const useJournal = () => {
   const isInDifficultMood = useCallback((): boolean => {
     const recent = getRecentEntries().slice(0, 3)
     if (recent.length < 3) return false
-    
+
     const difficultMoods: Mood[] = ['rain', 'storm']
     return recent.every(entry => difficultMoods.includes(entry.mood))
   }, [getRecentEntries])
@@ -202,7 +202,7 @@ export const useJournal = () => {
       exportedAt: new Date().toISOString(),
       version: '1.0'
     }
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -224,19 +224,19 @@ export const useJournal = () => {
     // State
     entries: state.entries,
     isLoading,
-    
+
     // Actions
     addEntry,
     getPrompt,
     getRitual,
     getPetReaction,
-    
+
     // Getters
     getTodayEntries,
     getRecentEntries,
     getMoodStats,
     isInDifficultMood,
-    
+
     // Utils
     exportData,
     clearData

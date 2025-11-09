@@ -13,12 +13,12 @@ export function useStableCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   deps: React.DependencyList
 ): T {
-  return React.useCallback(callback, deps)
+  return React.useCallback(callback, [callback, ...deps])
 }
 
 // Custom hook for stable value references
 export function useStableValue<T>(value: T, deps: React.DependencyList): T {
-  return React.useMemo(() => value, deps)
+  return React.useMemo(() => value, [value, ...deps])
 }
 
 // Performance monitoring hook

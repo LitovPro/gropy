@@ -58,7 +58,7 @@ const ShareButton = styled(motion.button)`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    transform: translateY(0);
   }
 `
 
@@ -97,7 +97,7 @@ interface ShareCardProps {
   className?: string
 }
 
-export const ShareCard: React.FC<ShareCardProps> = ({
+export const ShareCard: React.FC<ShareCardProps> = React.memo(({
   type,
   customMessage,
   days,
@@ -105,8 +105,8 @@ export const ShareCard: React.FC<ShareCardProps> = ({
 }) => {
   const [isSharing, setIsSharing] = useState(false)
 
-  const template = shareTemplates[type] || shareTemplates.general
-  const message = customMessage || template.message.replace('{days}', days?.toString() || '0')
+  const template = shareTemplates[type] ?? shareTemplates.general
+  const message = customMessage ?? template.message.replace('{days}', days?.toString() ?? '0')
 
   const handleShare = useCallback(async () => {
     if (isSharing) return
@@ -115,10 +115,10 @@ export const ShareCard: React.FC<ShareCardProps> = ({
 
     try {
       const shareText = `${template.emoji} ${template.title}\n\n${message}\n\n#gropy #selfcare #mindfulness`
-      
+
       // Use Telegram manager for sharing
       const success = await telegramShare(shareText)
-      
+
       if (success) {
         telegramNotification('success')
       } else {
@@ -161,7 +161,9 @@ export const ShareCard: React.FC<ShareCardProps> = ({
       </ShareButton>
     </ShareContainer>
   )
-}
+})
+
+ShareCard.displayName = 'ShareCard'
 
 // Hook for sharing with different templates
 export const useShare = () => {

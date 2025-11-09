@@ -25,9 +25,9 @@ const NavigationContainer = styled.div`
 const NavButton = styled.button<{ $isActive: boolean }>`
   display: grid;
   place-items: center;
-  background: ${({ $isActive, theme }) => 
+  background: ${({ $isActive, theme }) =>
     $isActive ? theme.color.pet.accent + '15' : 'none'};
-  border: ${({ $isActive, theme }) => 
+  border: ${({ $isActive, theme }) =>
     $isActive ? `2px solid ${theme.color.pet.primary}` : '2px solid transparent'};
   cursor: pointer;
   padding: ${tokens.space.sm};
@@ -36,15 +36,15 @@ const NavButton = styled.button<{ $isActive: boolean }>`
   min-width: 48px;
   min-height: 48px;
   position: relative;
-  box-shadow: ${({ $isActive, theme }) => 
+  box-shadow: ${({ $isActive, theme }) =>
     $isActive ? `0 2px 8px ${theme.color.pet.primary}30` : 'none'};
   /* Улучшенное центрирование для эмодзи */
   line-height: 1;
 
   &:hover {
-    background: ${({ $isActive, theme }) => 
+    background: ${({ $isActive, theme }) =>
       $isActive ? theme.color.pet.accent + '20' : theme.color.pet.accent + '10'};
-    border-color: ${({ $isActive, theme }) => 
+    border-color: ${({ $isActive, theme }) =>
       $isActive ? theme.color.pet.primary : theme.color.pet.accent + '50'};
   }
 
@@ -57,20 +57,27 @@ const NavButton = styled.button<{ $isActive: boolean }>`
 const NavIcon = styled.div<{ $isActive: boolean }>`
   font-size: ${({ $isActive }) => $isActive ? '30px' : '28px'};
   line-height: 1;
-  color: ${({ $isActive, theme }) => 
+  color: ${({ $isActive, theme }) =>
     $isActive ? theme.color.pet.primary : theme.color.textMuted};
   transition: all ${tokens.motion.base} ${tokens.motion.easing};
-  transform: ${({ $isActive }) => $isActive ? 'scale(1.1) translateY(-0.5px)' : 'translateY(-0.5px)'};
+  transform: ${({ $isActive }) => $isActive ? 'scale(1.1) translateY(-2px)' : 'translateY(-2px)'};
   filter: ${({ $isActive }) => $isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' : 'none'};
   /* Оптимизированное центрирование для эмодзи */
   text-align: center;
   display: block;
+  /* Выравнивание размеров эмодзи */
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${({ $isActive }) => $isActive ? '32px' : '30px'};
 `
 
 // const NavLabel = styled.div<{ $isActive: boolean }>`
 //   font-size: 11px;
 //   font-weight: ${tokens.typography.fontWeight.medium};
-//   color: ${({ $isActive, theme }) => 
+//   color: ${({ $isActive, theme }) =>
 //     $isActive ? theme.color.pet.primary : theme.color.textMuted};
 //   line-height: 1.2;
 //   font-family: ${tokens.typography.fontFamily.primary};
@@ -109,7 +116,7 @@ interface BottomNavigationProps {
   onItemClick: (itemId: string) => void
 }
 
-export const BottomNavigation: React.FC<BottomNavigationProps> = ({
+export const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({
   items,
   activeItem,
   onItemClick,
@@ -120,7 +127,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         <motion.div
           key={item.id}
           whileTap={{ scale: 0.95 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
         >
           <NavButton
             $isActive={activeItem === item.id}
@@ -134,7 +141,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               <Badge
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
               >
                 {item.badge > 99 ? '99+' : item.badge}
               </Badge>
@@ -144,6 +151,8 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       ))}
     </NavigationContainer>
   )
-}
+})
+
+BottomNavigation.displayName = 'BottomNavigation'
 
 

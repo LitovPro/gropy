@@ -13,9 +13,11 @@ import { useToast } from './components/Toast/useToast'
 import { safeGet, safeSet } from './utils/ls'
 import { Toast } from './components/Toast/Toast'
 import { EdgePeek } from './components/UX/EdgePeek'
+import { preloadOnHover } from './utils/lazyImports'
 // import { SuggestionsPager } from './components/SuggestionsPager/SuggestionsPager'
 // Lazy load heavy components
-const RitualsPager = lazy(() => import('./components/RitualsPager').then(m => ({ default: m.RitualsPager })))
+const TasksPager = lazy(() => import('./components/TasksPager').then(m => ({ default: m.TasksPager })))
+const ExercisesPager = lazy(() => import('./components/ExercisesPager').then(m => ({ default: m.ExercisesPager })))
 const EmotionalDiary = lazy(() => import('./components/EmotionalDiary').then(m => ({ default: m.EmotionalDiary })))
 const Shop = lazy(() => import('./components/Shop').then(m => ({ default: m.Shop })))
 const ProfileSection = lazy(() => import('./components/ProfileSection').then(m => ({ default: m.ProfileSection })))
@@ -47,21 +49,21 @@ const MainContent = styled.div`
   /* padding-bottom removed - handled by individual containers */
 `
 
-type ActiveTab = 'rituals' | 'diary' | 'stats' | 'profile'
+type ActiveTab = 'tasks' | 'exercises' | 'diary' | 'stats' | 'profile'
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('rituals')
+  const [activeTab, setActiveTab] = useState<ActiveTab>('tasks')
   const [showVictoryBubble, setShowVictoryBubble] = useState(false)
   const [ownedItems, setOwnedItems] = useState<string[]>([])
   // const [petMood, setPetMood] = useState<'happy' | 'sleepy' | 'excited' | 'calm'>('happy') // Temporarily disabled
-  
+
   const { toasts, showToast, hideToast } = useToast()
   const { todos, resetAllTodos, stats } = useTodos()
   const { gameState, addPoints, spendPoints, resetGameState, expForNextLevel } = useGameState()
   const { celebrateCompletion } = useDailyExperience()
-  const { 
-    completedRituals, 
-    dailyStreak, 
+  const {
+    completedRituals,
+    dailyStreak,
     completeRitual
   } = useRituals()
   useUiPrefs()
@@ -78,11 +80,12 @@ const App: React.FC = () => {
   const completedSuggestionIds = safeGet<string[]>('gropy-completed-suggestions', [])
   // const rankedSuggestions = rankSuggestions(allSuggestions, completedSuggestionIds)
 
-  // Navigation items - simplified to 4 main sections
+  // Navigation items - updated structure
   const navItems: NavItem[] = [
-    { id: 'rituals', label: 'Ритуалы', icon: '🌿' },
+    { id: 'tasks', label: 'Задачи', icon: '🎯' },
+    { id: 'exercises', label: 'Упражнения', icon: '🌿' },
     { id: 'diary', label: 'Дневник', icon: '📖' },
-    { id: 'stats', label: 'Прогресс', icon: '📊' },
+    { id: 'stats', label: 'Прогресс', icon: '🌟' },
     { id: 'profile', label: 'Профиль', icon: '👤' },
   ]
 
@@ -127,27 +130,19 @@ const App: React.FC = () => {
       celebrateCompletion()
       setShowVictoryBubble(true)
       // setPetMood('excited') // Temporarily disabled
-      
-      showToast('ритуал выполнен! ✨', {
-        action: {
-          label: 'отменить',
-          onAction: () => {
-            // Undo logic would go here
-          },
-        },
-      })
+
 
       // Reset pet mood after celebration - temporarily disabled
       // setTimeout(() => {
       //   setPetMood('happy')
       // }, 3000)
     }
-  }, [completeRitual, addPoints, celebrateCompletion, showToast])
+  }, [completeRitual, addPoints, celebrateCompletion])
 
   // Handle diary entry save
   const handleSaveDiaryEntry = useCallback(async (entry: { mood: string }) => {
     showToast('запись сохранена 💚')
-    
+
     // Update pet mood based on emotion - temporarily disabled
     // if (entry.mood === 'sun' || entry.mood === 'rainbow' || entry.mood === 'stars') {
     //   setPetMood('happy')
@@ -158,7 +153,7 @@ const App: React.FC = () => {
     // } else {
     //   setPetMood('happy')
     // }
-    
+
     return entry
   }, [showToast])
 
@@ -177,7 +172,7 @@ const App: React.FC = () => {
   // Handle clear completed todos
   // const handleClearCompleted = useCallback(() => {
   //   const clearedTodos = clearCompleted()
-  //   
+  //
   //   showToast('Очищено. Вернуть?', {
   //     action: {
   //       label: 'Вернуть',
@@ -186,7 +181,7 @@ const App: React.FC = () => {
   //       },
   //     },
   //   })
-  //   
+  //
   //   return clearedTodos
   // }, [clearCompleted, restoreCompleted, showToast])
 
@@ -213,7 +208,7 @@ const App: React.FC = () => {
       completedSuggestions: completedSuggestionIds,
       exportDate: new Date().toISOString(),
     }
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -221,7 +216,7 @@ const App: React.FC = () => {
     a.download = `gropy-backup-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
-    
+
     showToast('данные экспортированы! 📤')
   }, [todos, gameState, ownedItems, completedSuggestionIds, showToast])
 
@@ -289,24 +284,34 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'rituals':
+      case 'tasks':
         return (
-          <Suspense fallback={<LoadingSpinner message="Загружаем ритуалы..." />}>
-            <RitualsPager
+          <Suspense fallback={<LoadingSpinner message="Загружаем задачи..." />}>
+            <TasksPager
               completedRituals={completedRituals}
               onCompleteRitual={handleCompleteRitual}
               maxDailyRituals={3}
             />
           </Suspense>
         )
-        case 'diary':
-          return (
-            <Suspense fallback={<LoadingSpinner message="Загружаем дневник..." />}>
-              <EmotionalDiary
-                onSaveEntry={handleSaveDiaryEntry}
-              />
-            </Suspense>
-          )
+      case 'exercises':
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загружаем упражнения..." />}>
+            <ExercisesPager
+              completedRituals={completedRituals}
+              onCompleteRitual={handleCompleteRitual}
+              maxDailyRituals={3}
+            />
+          </Suspense>
+        )
+      case 'diary':
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загружаем дневник..." />}>
+            <EmotionalDiary
+              onSaveEntry={handleSaveDiaryEntry}
+            />
+          </Suspense>
+        )
       case 'stats':
         return (
           <>
@@ -375,6 +380,11 @@ const App: React.FC = () => {
           items={navItems}
           activeItem={activeTab}
           onItemClick={(itemId) => setActiveTab(itemId as ActiveTab)}
+          {...preloadOnHover(() => import('./components/TasksPager'))}
+          {...preloadOnHover(() => import('./components/ExercisesPager'))}
+          {...preloadOnHover(() => import('./components/EmotionalDiary'))}
+          {...preloadOnHover(() => import('./components/Shop'))}
+          {...preloadOnHover(() => import('./components/ProfileSection'))}
         />
       </AppContainer>
     </ErrorBoundary>
