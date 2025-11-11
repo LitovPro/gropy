@@ -2,10 +2,12 @@
 
 declare const self: ServiceWorkerGlobalScope
 
-// Cache names
-// const CACHE_NAME = 'gropy-v1'
-const STATIC_CACHE = 'gropy-static-v1'
-const DYNAMIC_CACHE = 'gropy-dynamic-v1'
+// Cache version - increment this when you want to force cache update
+const CACHE_VERSION = 'v2'
+
+// Cache names with versioning
+const STATIC_CACHE = `gropy-static-${CACHE_VERSION}`
+const DYNAMIC_CACHE = `gropy-dynamic-${CACHE_VERSION}`
 
 // Files to cache on install
 const STATIC_FILES = [
@@ -26,13 +28,18 @@ self.addEventListener('install', (event) => {
   self.skipWaiting()
 })
 
-// Activate event
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+          // Delete all caches that don't match current version
+          if (
+            cacheName.startsWith('gropy-') &&
+            cacheName !== STATIC_CACHE &&
+            cacheName !== DYNAMIC_CACHE
+          ) {
             return caches.delete(cacheName)
           }
         })

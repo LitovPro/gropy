@@ -66,13 +66,13 @@ const SupportOptions = styled.div`
   z-index: 1;
 `
 
-const SupportButton = styled(motion.button)<{ isSelected?: boolean }>`
-  background: ${({ theme, isSelected }) =>
-    isSelected ? theme.color.pet.primary : theme.color.surface};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? 'white' : theme.color.text};
-  border: 2px solid ${({ theme, isSelected }) =>
-    isSelected ? theme.color.pet.primary : theme.color.border};
+const SupportButton = styled(motion.button)<{ $isSelected?: boolean }>`
+  background: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.pet.primary : theme.color.surface};
+  color: ${({ theme, $isSelected }) =>
+    $isSelected ? 'white' : theme.color.text};
+  border: 2px solid ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.pet.primary : theme.color.border};
   border-radius: ${tokens.radius.button};
   padding: ${tokens.space.sm} ${tokens.space.md};
   font-size: 12px;
@@ -248,7 +248,7 @@ export const SupportCard: React.FC<SupportCardProps> = React.memo(({ className }
         {supportOptions.map((option) => (
           <SupportButton
             key={option.amount}
-            isSelected={selectedAmount === option.amount}
+            $isSelected={selectedAmount === option.amount}
             onClick={() => handleAmountSelect(option.amount)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

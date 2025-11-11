@@ -7,6 +7,7 @@ import { tokens } from '../design/tokens'
 import { ActionBar } from './ActionBar'
 import { WindowIcon } from './WindowIcon'
 import { getBreathingSteps, getBreathingPhases, BREATHING_MODES } from '../data/ritualsData'
+import { RITUAL_SVG } from '../design/ritualSvg'
 
 const ActiveContainer = styled(motion.div).withConfig({
   shouldForwardProp: (prop) => !prop.startsWith('$')
@@ -232,202 +233,7 @@ const WaterFill = styled(motion.div).withConfig({
   transition: height 0.5s ease;
 `
 
-const StretchHead = styled(motion.div).withConfig({
-  shouldForwardProp: (prop) => !prop.startsWith('$')
-})`
-  width: 100px;
-  height: 100px;
-  position: relative;
-  margin: 0 auto ${tokens.space.lg} auto;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`
-
-const HeadIcon = styled(motion.div).withConfig({
-  shouldForwardProp: (prop) => !prop.startsWith('$')
-})<{ $isRotated: boolean }>`
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #F7F3E9, #E8F4F8);
-  border: 2px solid ${({ theme }) => theme.color.pet.primary};
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  position: relative;
-  z-index: 2;
-
-  /* Волосы */
-  &::before {
-    content: '';
-    position: absolute;
-    top: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70px;
-    height: 25px;
-    border-radius: 35px 35px 0 0;
-    background: linear-gradient(135deg, #8B7355, #A68B5B);
-    z-index: -1;
-  }
-`
-
-const LeftEye = styled.div`
-  position: absolute;
-  top: 28px;
-  left: 22px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid ${({ theme }) => theme.color.pet.primary};
-  z-index: 3;
-
-  /* Зрачок */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.color.pet.primary};
-  }
-
-  /* Блик */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 1px;
-    left: 1px;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: white;
-    z-index: 4;
-  }
-`
-
-const RightEye = styled.div`
-  position: absolute;
-  top: 28px;
-  right: 22px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid ${({ theme }) => theme.color.pet.primary};
-  z-index: 3;
-
-  /* Зрачок */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.color.pet.primary};
-  }
-
-  /* Блик */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 1px;
-    left: 1px;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: white;
-    z-index: 4;
-  }
-`
-
-const Nose = styled.div`
-  position: absolute;
-  top: 42px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 10px;
-  border-radius: 3px;
-  background: linear-gradient(135deg, #E8D5C4, #D4C4B0);
-  z-index: 3;
-`
-
-const Mouth = styled.div`
-  position: absolute;
-  bottom: 22px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 6px;
-  border-radius: 0 0 12px 12px;
-  background: linear-gradient(135deg, #E8A87C, #D4956B);
-  z-index: 3;
-
-  /* Верхняя губа */
-  &::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 2px;
-    border-radius: 1px;
-    background: linear-gradient(135deg, #E8A87C, #D4956B);
-  }
-`
-
-const Cheeks = styled.div`
-  position: absolute;
-  top: 45px;
-  left: 12px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #F7BFA0, #E8A87C);
-  opacity: 0.6;
-  z-index: 1;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -56px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #F7BFA0, #E8A87C);
-    opacity: 0.6;
-  }
-`
-
-const GratitudeInput = styled(motion.input).withConfig({
-  shouldForwardProp: (prop) => !prop.startsWith('$')
-})`
-  width: 100%;
-  padding: ${tokens.space.md};
-  border: 2px solid ${({ theme }) => theme.color.border};
-  border-radius: ${tokens.radius.button};
-  background: ${({ theme }) => theme.color.bg};
-  font-size: ${tokens.typography.fontSize.base};
-  font-weight: ${tokens.typography.fontWeight.normal};
-  font-family: ${tokens.typography.fontFamily.primary};
-  color: ${({ theme }) => theme.color.text};
-  text-align: center;
-  margin-bottom: ${tokens.space.lg};
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.color.pet.primary};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.color.pet.primary}20;
-  }
-`
+// Unused legacy styled helpers removed for clarity
 
 
 interface RitualActiveProps {
@@ -457,12 +263,17 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [waterLevel, setWaterLevel] = useState(0)
-  const [gratitudeText, setGratitudeText] = useState('')
+  // gratitude text input removed (not used)
   // const [selectedKindness] = useState<string | null>(null)
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale' | 'pause'>('inhale')
   const [headRotated, setHeadRotated] = useState(false)
-  const [heartFilled, setHeartFilled] = useState(false)
   const [isWalking, setIsWalking] = useState(false)
+  const [animTriggered, setAnimTriggered] = useState<Record<string, boolean>>({})
+  const isAnimating = !!animTriggered[ritual.id]
+  const triggerAnimAndComplete = (delayMs: number) => {
+    setAnimTriggered(prev => prev[ritual.id] ? prev : { ...prev, [ritual.id]: true })
+    setTimeout(() => { onComplete() }, delayMs)
+  }
 
   // Debug info removed for production
 
@@ -471,7 +282,6 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
 
   // State for breathing cycles
   const [breathingStartTime, setBreathingStartTime] = useState<number | null>(null)
-  const [completedCycles, setCompletedCycles] = useState(0)
   const [forceUpdate, setForceUpdate] = useState(0)
 
   // Initialize breathing start time when component mounts for breathing exercises
@@ -520,7 +330,8 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
     if (session.mode === 'guided' && ritual.guidedSteps && timeLeft > 0) {
       // const stepDuration = currentStep?.duration || 0
       const totalSteps = ritual.guidedSteps.length
-      const stepProgress = (session.duration - timeLeft) / session.duration
+      const totalDurationSec = session.duration ?? 1
+      const stepProgress = (totalDurationSec - timeLeft) / totalDurationSec
       const newStepIndex = Math.min(Math.floor(stepProgress * totalSteps), totalSteps - 1)
 
       if (newStepIndex !== currentStepIndex) {
@@ -544,11 +355,12 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
       const breathingSteps = getBreathingSteps(breathingMode)
       let currentPhaseIndex = 0
       let accumulatedProgress = 0
+      const totalDuration = breathingSteps.reduce((total, step) => total + step.duration, 0)
 
       for (let i = 0; i < breathingSteps.length; i++) {
-        const stepDuration = breathingSteps[i].duration
-        const totalDuration = breathingSteps.reduce((total, step) => total + step.duration, 0)
-        const stepProgress = stepDuration / totalDuration
+        const step = breathingSteps[i]!
+        const stepDuration = step.duration
+        const stepProgress = totalDuration > 0 ? stepDuration / totalDuration : 0
 
         if (cycleProgress < accumulatedProgress + stepProgress) {
           currentPhaseIndex = i
@@ -566,7 +378,7 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
       setBreathingPhase(newPhase)
 
       // Auto-complete only after max cycles
-      if (completedCycles >= maxCycles) {
+      if (completedCycles >= (maxCycles ?? 0)) {
         // Auto-completing after max cycles
         setTimeout(() => {
           onComplete()
@@ -592,11 +404,7 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
     return () => clearInterval(interval)
   }, [breathingStartTime, ritual.id])
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+  // formatTime removed (unused)
 
   const handleWaterFill = () => {
     setWaterLevel(100)
@@ -613,10 +421,9 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
   }
 
   const handleGratitudeSave = () => {
-    setHeartFilled(true)
     setTimeout(() => {
       onComplete()
-    }, 1500)
+    }, 800)
   }
 
 
@@ -665,7 +472,7 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
         />
 
             <BreathingPhases data-phase-count={getBreathingPhases(breathingMode).length}>
-              {getBreathingPhases(breathingMode).map((phase, index) => {
+              {getBreathingPhases(breathingMode).map((phase) => {
                 const phaseLabels = {
                   inhale: 'Вдох',
                   hold: 'Задержка',
@@ -706,6 +513,126 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
           </motion.div>
         )
 
+      case 'brush-teeth':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1200)}
+            >
+              {/* дуга зубов (минимально) */}
+              <path d="M15 55 Q60 65 105 55" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+
+              {/* группа щётки */}
+              <motion.g
+                animate={isAnimating ? { x: [0, 10, 0], y: [0, -2, 0], rotate: [0, -2, 0] } : {}}
+                transition={{ duration: 1.1, ease: "easeInOut" }}
+              >
+                {/* ручка */}
+                <path d="M20 45 H75" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth} strokeLinecap="round"/>
+                {/* щетинки — тонкие линии с лёгкой вибрацией */}
+                {[0, 5, 10, 15, 20].map((dx) => (
+                  <motion.line
+                    key={dx}
+                    x1={55 + dx} y1={40}
+                    x2={55 + dx} y2={34}
+                    stroke={RITUAL_SVG.stroke}
+                    strokeWidth={RITUAL_SVG.strokeWidthThin}
+                    animate={isAnimating ? { y2: [34, 33, 34] } : {}}
+                    transition={{ duration: 0.6, ease: "easeInOut", repeat: 0 }}
+                  />
+                ))}
+              </motion.g>
+
+              {/* пена — точки с лёгкой пульсацией после клика */}
+              {[30, 36, 42].map((x, i) => (
+                <motion.circle
+                  key={x}
+                  cx={x} cy={48} r={2}
+                  fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}
+                  initial={{ scale: 1, opacity: 1 }}
+                  animate={isAnimating ? { scale: [1, 1.15, 1], opacity: [0.85, 1, 0.85] } : { scale: 1, opacity: 1 }}
+                  transition={{ duration: 1 + i * 0.1, ease: "easeInOut" }}
+                />
+              ))}
+            </motion.svg>
+            <StepDescription>Почисти зубы медленно и осознанно</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда закончил</StepInstruction>
+          </motion.div>
+        )
+
+      case 'massage-temples':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1200)}
+            >
+              {/* контур головы */}
+              <circle cx="50" cy="35" r="22" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth} />
+              {/* виски - пульсация тонкими линиями */}
+              <motion.circle cx="35" cy="35" r={4} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}
+                             animate={isAnimating ? { scale: [1, 1.15, 1], opacity: [0.8, 1, 0.8] } : {}}
+                             transition={{ duration: 1.2, ease: "easeInOut" }}/>
+              <motion.circle cx="65" cy="35" r={4} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}
+                             animate={isAnimating ? { scale: [1, 1.15, 1], opacity: [0.8, 1, 0.8] } : {}}
+                             transition={{ duration: 1.2, ease: "easeInOut", delay: 0.15 }}/>
+            </motion.svg>
+            <StepDescription>Помассируй виски, чтобы снять напряжение</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда закончишь</StepInstruction>
+          </motion.div>
+        )
+
+      case 'massage-shoulders':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1200)}
+            >
+              {/* плечи дугой */}
+              <motion.path
+                d="M15 55 Q60 35 105 55"
+                fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { y: [0, -2, 0] } : {}}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+              />
+              {/* точки массажа тонкими кружками */}
+              <circle cx="35" cy="50" r={3} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}/>
+              <circle cx="85" cy="50" r={3} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}/>
+            </motion.svg>
+            <StepDescription>Помассируй плечи, чтобы снять зажимы</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда закончишь</StepInstruction>
+          </motion.div>
+        )
+
       case 'water':
         return (
           <motion.div
@@ -738,47 +665,25 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
             transition={{ duration: 0.3 }}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
           >
-            <motion.div
-              style={{
-                width: '320px',
-                height: '320px',
-                borderRadius: '50%',
-                background: '#F5F3EE',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 60 60"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
               onClick={handleGratitudeSave}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              animate={heartFilled ? {
-                scale: [1, 1.1, 1, 1.1, 1],
-                transition: {
-                  duration: 1.5,
-                  times: [0, 0.2, 0.4, 0.6, 1],
-                  ease: "easeInOut"
-                }
-              } : {}}
             >
-              <svg width="267" height="267" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                <motion.path
-                  d="M30 50 C30 50, 10 35, 10 22 C10 15, 16 10, 23 10 C27 10, 30 13, 30 13 C30 13, 33 10, 37 10 C44 10, 50 15, 50 22 C50 35, 30 50, 30 50 Z"
-                  fill={heartFilled ? "#A7C7B7" : "none"}
-                  stroke="#A7C7B7"
-                  strokeWidth="1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  animate={heartFilled ? {
-                    fill: ["none", "#A7C7B7"],
-                    transition: {
-                      duration: 0.8,
-                      ease: "easeInOut"
-                    }
-                  } : {}}
-                />
-              </svg>
-            </motion.div>
+              <path
+                d="M30 50 C30 50, 10 35, 10 22 C10 15, 16 10, 23 10 C27 10, 30 13, 30 13 C30 13, 33 10, 37 10 C44 10, 50 15, 50 22 C50 35, 30 50, 30 50 Z"
+                fill="none"
+                stroke="#A7C7B7"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </motion.svg>
             <StepDescription>
               Подумай о том, за что ты благодарен сегодня
             </StepDescription>
@@ -904,155 +809,549 @@ export const RitualActive: React.FC<RitualActiveProps> = ({
           </motion.div>
         )
 
-    case 'ventilate':
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
-        >
-          <div
-            style={{
-              userSelect: 'none',
-              color: 'rgb(167, 199, 183)'
-            }}
+      case 'wash-face':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
           >
-            <WindowIcon size={440} onOpen={onComplete} />
-          </div>
-          <StepDescription>
-            Открой окно на 5 минут
-          </StepDescription>
-          <StepInstruction>
-            Нажми на окно, когда откроешь его
-          </StepInstruction>
-        </motion.div>
-      )
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1000)}
+            >
+              {/* лицо */}
+              <circle cx="60" cy="40" r="22" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth} />
+              {/* капли воды (тонкие) */}
+              <motion.circle
+                cx={50} cy={18} r={2.5} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}
+                initial={{ cy: 18, opacity: 1 }}
+                animate={isAnimating ? { cy: [18, 30, 42], opacity: [1, 1, 0] } : { cy: 18, opacity: 1 }}
+                transition={{ duration: 1, ease: RITUAL_SVG.ease }}
+              />
+              <motion.circle
+                cx={70} cy={18} r={2.5} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}
+                initial={{ cy: 18, opacity: 1 }}
+                animate={isAnimating ? { cy: [18, 30, 42], opacity: [1, 1, 0] } : { cy: 18, opacity: 1 }}
+                transition={{ duration: 1, ease: RITUAL_SVG.ease, delay: 0.15 }}
+              />
+              {/* закрытые глаза */}
+              <line x1="52" y1="40" x2="56" y2="40" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth} strokeLinecap="round" />
+              <line x1="64" y1="40" x2="68" y2="40" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth} strokeLinecap="round" />
+            </motion.svg>
+            <StepDescription>Умойся прохладной водой для бодрости</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда умоешься</StepInstruction>
+          </motion.div>
+        )
+
+      case 'play-music':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1500)}
+            >
+              {/* нота */}
+              <motion.path
+                d="M30 60 q10 -10 20 0 v-30 h10 v40"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { pathLength: [0, 1] } : {}}
+                transition={{ duration: 1, ease: RITUAL_SVG.ease }}
+              />
+              <motion.circle
+                cx={28} cy={62} r={6} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] } : {}}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+              />
+            </motion.svg>
+            <StepDescription>Включи любимую песню</StepDescription>
+            <StepInstruction>Нажми на ноту, когда послушаешь</StepInstruction>
+          </motion.div>
+        )
+
+      case 'water-plants':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1200)}
+            >
+              {/* горшок — крупнее и по центру */}
+              <rect x="38" y="46" width="44" height="24" rx="4" ry="4" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}/>
+              <line x1="38" y1="46" x2="82" y2="46" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}/>
+              {/* лист — тонкий контур */}
+              <motion.path
+                d="M60 46 Q62 36 72 34 Q68 42 62 46"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidthThin}
+                animate={isAnimating ? { pathLength: [0, 1] } : {}}
+                transition={{ duration: 1, ease: RITUAL_SVG.ease }}
+              />
+              {/* капля воды — падает в горшок */}
+              <motion.circle
+                cx={52} cy={28} r={2} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidthThin}
+                initial={{ cy: 28, opacity: 1 }}
+                animate={isAnimating ? { cy: [28, 40, 46], opacity: [1, 1, 0] } : { cy: 28, opacity: 1 }}
+                transition={{ duration: 1, ease: RITUAL_SVG.ease }}
+              />
+            </motion.svg>
+            <StepDescription>Полей растения</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда польёшь</StepInstruction>
+          </motion.div>
+        )
+
+      case 'close-tabs':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1000)}
+            >
+              {/* вкладки */}
+              <motion.rect x="15" y="20" width="90" height="12" rx="2" ry="2" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { x: [15, 10, 15] } : {}}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+              />
+              <motion.rect x="20" y="36" width="85" height="12" rx="2" ry="2" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { opacity: [1, 0.7, 1] } : {}}
+                transition={{ duration: 1, ease: "easeInOut" }}
+              />
+              <motion.rect x="25" y="52" width="80" height="12" rx="2" ry="2" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { x: [25, 30, 25] } : {}}
+                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
+              />
+              {/* крестик закрытия */}
+              <motion.line x1="95" y1="24" x2="101" y2="30" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { opacity: [0.8, 1, 0.8] } : {}}
+                transition={{ duration: 1 }}
+              />
+              <motion.line x1="101" y1="24" x2="95" y2="30" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { opacity: [0.8, 1, 0.8] } : {}}
+                transition={{ duration: 1 }}
+              />
+            </motion.svg>
+            <StepDescription>Закрой лишние вкладки</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда закроешь</StepInstruction>
+          </motion.div>
+        )
+
+      case 'look-sky':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1000)}
+            >
+              {/* облака */}
+              <motion.path
+                d="M20 40 Q30 35 40 40 Q50 35 60 40"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { x: [0, 4, 0] } : {}}
+                transition={{ duration: 3, ease: "easeInOut" }}
+              />
+              <motion.circle cx={85} cy={28} r={6} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { opacity: [0.7, 1, 0.7] } : {}}
+                transition={{ duration: 2 }}
+              />
+            </motion.svg>
+            <StepDescription>Посмотри на небо</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда посмотришь</StepInstruction>
+          </motion.div>
+        )
+
+      case 'ventilate':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <div
+              style={{
+                userSelect: 'none',
+                color: 'rgb(167, 199, 183)'
+              }}
+            >
+              <WindowIcon size={440} onOpen={onComplete} />
+            </div>
+            <StepDescription>
+              Открой окно на 5 минут
+            </StepDescription>
+            <StepInstruction>
+              Нажми на окно, когда откроешь его
+            </StepInstruction>
+          </motion.div>
+        )
 
       case 'look-window':
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
           >
-            <motion.div
-              style={{
-                fontSize: '120px',
-                cursor: 'pointer',
-                userSelect: 'none'
-              }}
-              animate={{
-                scale: [1, 1.05, 1],
-                opacity: [0.8, 1, 0.8]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              onClick={onComplete}
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1000)}
             >
-              👁️
-            </motion.div>
-            <StepDescription>
-              Посмотри в окно и дай глазам отдохнуть
-            </StepDescription>
-            <StepInstruction>
-              Нажми на глаз, когда посмотришь в окно
-            </StepInstruction>
+              {/* окно */}
+              <rect x="20" y="20" width="80" height="40" rx="3" ry="3" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}/>
+              <line x1="60" y1="20" x2="60" y2="60" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}/>
+              <line x1="20" y1="40" x2="100" y2="40" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}/>
+              {/* вид за окном */}
+              <motion.path
+                d="M22 48 Q40 42 60 48 Q80 42 98 48"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { x: [0, 2, 0] } : {}}
+                transition={{ duration: 3, ease: "easeInOut" }}
+              />
+              <motion.circle
+                cx="88" cy="28" r="4" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { opacity: [0.7, 1, 0.7] } : {}}
+                transition={{ duration: 2 }}
+              />
+            </motion.svg>
+            <StepDescription>Посмотри в окно и дай глазам отдохнуть</StepDescription>
+            <StepInstruction>Нажми на окно, когда закончишь</StepInstruction>
           </motion.div>
         )
+
+      case 'find-beauty':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1200)}
+            >
+              {/* три минималистичные звезды */}
+              <motion.path
+                d="M20 30 L24 34 L20 38 L16 34 Z"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { scale: [1, 1.1, 1], opacity: [0.9, 1, 0.9] } : {}}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+              />
+              <motion.path
+                d="M60 20 L63 23 L60 26 L57 23 Z"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { scale: [1, 1.1, 1], opacity: [0.9, 1, 0.9] } : {}}
+                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
+              />
+              <motion.path
+                d="M95 40 L99 44 L95 48 L91 44 Z"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { scale: [1, 1.1, 1], opacity: [0.9, 1, 0.9] } : {}}
+                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.4 }}
+              />
+            </motion.svg>
+            <StepDescription>Найди три красивых предмета вокруг</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда отметишь их</StepInstruction>
+          </motion.div>
+        )
+
+      case 'close-eyes':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1000)}
+            >
+              {/* контур глаза */}
+              <path d="M10 30 Q60 5 110 30 Q60 55 10 30" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}/>
+              {/* веки (закрытие/открытие) */}
+              <motion.line
+                x1="20" y1="30" x2="100" y2="30"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                strokeLinecap="round"
+                animate={isAnimating ? { opacity: [0.6, 1, 0.6] } : {}}
+                transition={{ duration: 1.2 }}
+              />
+            </motion.svg>
+            <StepDescription>Закрой глаза на минуту</StepDescription>
+            <StepInstruction>Нажми на глаз, когда закончишь</StepInstruction>
+          </motion.div>
+        )
+
+      case 'listen-silence':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1500)}
+            >
+              {/* затухающие волны */}
+              <motion.path
+                d="M20 35 Q40 20 60 35 Q80 50 100 35"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { opacity: [1, 0.6, 0.3] } : {}}
+                transition={{ duration: 2, ease: "easeInOut" }}
+              />
+              <motion.path
+                d="M25 45 Q45 30 60 45 Q75 60 95 45"
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { opacity: [0.8, 0.4, 0.2] } : {}}
+                transition={{ duration: 2.2, ease: "easeInOut" }}
+              />
+            </motion.svg>
+            <StepDescription>Послушай тишину</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда послушаешь</StepInstruction>
+          </motion.div>
+        )
+
+      case 'hear-sounds':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1500)}
+            >
+              {/* пять «звуковых» точек */}
+              {[20, 45, 70, 95, 110].map((x, i) => (
+                <motion.circle
+                  key={x}
+                  cx={x} cy={30} r="3"
+                  fill="none"
+                  stroke={RITUAL_SVG.stroke}
+                  strokeWidth={RITUAL_SVG.strokeWidth}
+                  animate={isAnimating ? { scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] } : {}}
+                  transition={{ duration: 1 + i * 0.1, ease: "easeInOut" }}
+                />
+              ))}
+            </motion.svg>
+            <StepDescription>Услышь пять звуков вокруг</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда отметишь их</StepInstruction>
+          </motion.div>
+        )
+
+      case 'touch-soft':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1200)}
+            >
+              {/* контур ладони (упрощённый) */}
+              <path d="M20 60 Q25 40 30 38 Q35 36 40 42 Q42 35 48 36 Q54 37 55 44 Q60 44 62 48 Q64 52 62 58 Q50 70 35 70"
+                    fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth} />
+              {/* мягкая пульсация */}
+              <motion.circle cx={40} cy={55} r={10} fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                             animate={isAnimating ? { scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] } : {}}
+                             transition={{ duration: 1.5, ease: "easeInOut" }}/>
+            </motion.svg>
+            <StepDescription>Потрогай что-то мягкое</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда почувствуешь мягкость</StepInstruction>
+          </motion.div>
+        )
+
+      case 'hug-self':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
+          >
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1500)}
+            >
+              {/* корпус */}
+              <circle cx="60" cy="30" r="18" fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}/>
+              {/* руки-дуги */}
+              <motion.path
+                d="M20 60 Q40 45 60 50 Q80 45 100 60"
+                fill="none" stroke={RITUAL_SVG.stroke} strokeWidth={RITUAL_SVG.strokeWidth}
+                animate={isAnimating ? { scale: [1, 1.02, 1], opacity: [0.9, 1, 0.9] } : {}}
+                transition={{ duration: 1.4, ease: "easeInOut" }}
+              />
+            </motion.svg>
+            <StepDescription>Обними себя — мягко и бережно</StepDescription>
+            <StepInstruction>Нажми на рисунок, когда завершишь</StepInstruction>
+          </motion.div>
+        )
+
+      /* duplicate 'look-window' removed */
 
       case 'tidy':
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: RITUAL_SVG.duration.enter }}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}
           >
-            <motion.div
-              style={{
-                width: '320px',
-                height: '240px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                position: 'relative'
-              }}
-              onClick={onComplete}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <motion.svg
+              width="320"
+              height="200"
+              viewBox="0 0 120 80"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ cursor: 'pointer' }}
+              onClick={() => triggerAnimAndComplete(1200)}
             >
-              {/* Рабочий стол */}
-              <motion.svg
-                width="320"
-                height="240"
-                viewBox="0 0 320 240"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ position: 'absolute' }}
-              >
-                {/* Столешница */}
-                <rect x="20" y="120" width="280" height="8" fill="#8B4513" rx="4"/>
-
-                {/* Ножки стола */}
-                <rect x="30" y="128" width="6" height="80" fill="#654321"/>
-                <rect x="284" y="128" width="6" height="80" fill="#654321"/>
-                <rect x="20" y="128" width="6" height="80" fill="#654321"/>
-                <rect x="294" y="128" width="6" height="80" fill="#654321"/>
-
-                {/* Предметы на столе (хаотично разбросанные) */}
-                <rect x="40" y="100" width="20" height="15" fill="#FF6B6B" rx="2"/>
-                <rect x="80" y="90" width="25" height="20" fill="#4ECDC4" rx="3"/>
-                <circle cx="150" cy="105" r="12" fill="#FFE66D"/>
-                <rect x="180" y="95" width="30" height="25" fill="#A8E6CF" rx="4"/>
-                <rect x="220" y="85" width="15" height="20" fill="#FFB3BA" rx="2"/>
-                <rect x="250" y="100" width="20" height="12" fill="#B19CD9" rx="2"/>
-
-                {/* Бумаги */}
-                <rect x="60" y="110" width="12" height="8" fill="white" rx="1"/>
-                <rect x="65" y="108" width="12" height="8" fill="white" rx="1"/>
-                <rect x="70" y="106" width="12" height="8" fill="white" rx="1"/>
-
-                {/* Чашка */}
-                <ellipse cx="200" cy="110" rx="8" ry="6" fill="#8B4513"/>
-                <rect x="192" y="110" width="16" height="12" fill="#D2691E" rx="2"/>
-
-                {/* Книги */}
-                <rect x="120" y="95" width="8" height="20" fill="#2C3E50"/>
-                <rect x="130" y="90" width="8" height="25" fill="#34495E"/>
-                <rect x="140" y="85" width="8" height="30" fill="#2C3E50"/>
-              </motion.svg>
-
-              {/* Анимированная метла */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  fontSize: '60px',
-                  zIndex: 10
-                }}
-                animate={{
-                  x: [0, 20, -20, 0],
-                  rotate: [0, 5, -5, 0]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                🧹
-              </motion.div>
-            </motion.div>
-            <StepDescription>
-              Наведи порядок на рабочем месте
-            </StepDescription>
-            <StepInstruction>
-              Убери лишние предметы, разложи всё по местам, затем нажми на стол
-            </StepInstruction>
+              {/* Столешница (шире) */}
+              <line
+                x1="10"
+                y1="48"
+                x2="110"
+                y2="48"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                strokeLinecap="round"
+              />
+              {/* Ножки (расставлены шире и длиннее) */}
+              <line
+                x1="25"
+                y1="48"
+                x2="25"
+                y2="70"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                strokeLinecap="round"
+              />
+              <line
+                x1="95"
+                y1="48"
+                x2="95"
+                y2="70"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                strokeLinecap="round"
+              />
+              {/* Беспорядок (волна шире и выше) */}
+              <motion.path
+                d="
+                  M 18 47
+                  Q 28 35 40 41
+                  Q 50 32 60 42
+                  Q 70 33 80 43
+                  Q 92 36 102 47
+                "
+                fill="none"
+                stroke={RITUAL_SVG.stroke}
+                strokeWidth={RITUAL_SVG.strokeWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                pathLength={1}
+                initial={{ pathLength: 1, opacity: 1, strokeDasharray: '1px 1px', strokeDashoffset: 0 }}
+                animate={isAnimating ? { pathLength: 0, opacity: 0 } : { pathLength: 1, opacity: 1 }}
+                transition={{ duration: 0.9, ease: 'easeInOut' }}
+              />
+            </motion.svg>
+            <StepDescription>Наведи порядок на рабочем месте</StepDescription>
+            <StepInstruction>Нажми на стол: беспорядок исчезнет</StepInstruction>
           </motion.div>
         )
 

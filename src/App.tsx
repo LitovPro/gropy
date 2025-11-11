@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react'
 import styled from 'styled-components'
-// import { Suggestion } from './types'
 import { useTodos } from './hooks/useTodos'
 import { useGameState } from './hooks/useGameState'
 import { useDailyExperience } from './hooks/useDailyExperience'
@@ -8,13 +7,20 @@ import { useRituals } from './hooks/useRituals'
 import { useJournal } from './hooks/useJournal'
 import { useUiPrefs } from './hooks/useUiPrefs'
 import { useToast } from './components/Toast/useToast'
-// import { getAdaptedDailySuggestions } from './utils/suggestionsAdapter'
-// import { rankSuggestions } from './utils/suggestionRanking'
 import { safeGet, safeSet } from './utils/ls'
+import { validateImportData, sanitizeImportData } from './utils/dataValidation'
 import { Toast } from './components/Toast/Toast'
 import { EdgePeek } from './components/UX/EdgePeek'
 import { preloadOnHover } from './utils/lazyImports'
-// import { SuggestionsPager } from './components/SuggestionsPager/SuggestionsPager'
+import {
+  MAX_DAILY_RITUALS,
+  DEFAULT_SHOP_ITEM_PRICE,
+  RITUAL_COMPLETION_POINTS,
+  VICTORY_BUBBLE_DURATION,
+  RESET_RELOAD_DELAY,
+  STORAGE_KEYS,
+  EXPORT_DATA_VERSION,
+} from './constants'
 // Lazy load heavy components
 const TasksPager = lazy(() => import('./components/TasksPager').then(m => ({ default: m.TasksPager })))
 const ExercisesPager = lazy(() => import('./components/ExercisesPager').then(m => ({ default: m.ExercisesPager })))
@@ -24,10 +30,6 @@ const ProfileSection = lazy(() => import('./components/ProfileSection').then(m =
 const SoundSettings = lazy(() => import('./components/SoundSettings').then(m => ({ default: m.SoundSettings })))
 const SupportCard = lazy(() => import('./components/SupportCard').then(m => ({ default: m.SupportCard })))
 
-// import { TodoForm } from './components/TodoForm'
-// import { TodoList } from './components/TodoList'
-// import { DoneList } from './components/DoneList'
-// import { Pet } from './components/Pet' // Temporarily disabled
 import { StatsPanel } from './components/StatsPanel'
 import { UiSettings } from './components/UiSettings'
 import { BottomNavigation, NavItem } from './components/BottomNavigation'
@@ -37,7 +39,7 @@ import './styles/attentionZones.css'
 
 const AppContainer = styled.div`
   min-height: 100dvh;
-  background: ${({ theme }) => theme['color']['bg']};
+  background: ${({ theme }) => theme.color.bg};
   display: grid;
   grid-template-rows: 1fr auto;
 `
@@ -55,7 +57,6 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('tasks')
   const [showVictoryBubble, setShowVictoryBubble] = useState(false)
   const [ownedItems, setOwnedItems] = useState<string[]>([])
-  // const [petMood, setPetMood] = useState<'happy' | 'sleepy' | 'excited' | 'calm'>('happy') // Temporarily disabled
 
   const { toasts, showToast, hideToast } = useToast()
   const { todos, resetAllTodos, stats } = useTodos()
@@ -71,14 +72,11 @@ const App: React.FC = () => {
 
   // Load owned items
   useEffect(() => {
-    const saved = safeGet<string[]>('gropy-owned-items', [])
+    const saved = safeGet<string[]>(STORAGE_KEYS.OWNED_ITEMS, [])
     setOwnedItems(saved)
   }, [])
 
-  // Generate and rank suggestions
-  // const allSuggestions = getAdaptedDailySuggestions()
-  const completedSuggestionIds = safeGet<string[]>('gropy-completed-suggestions', [])
-  // const rankedSuggestions = rankSuggestions(allSuggestions, completedSuggestionIds)
+  const completedSuggestionIds = safeGet<string[]>(STORAGE_KEYS.COMPLETED_SUGGESTIONS, [])
 
   // Navigation items - updated structure
   const navItems: NavItem[] = [
@@ -89,110 +87,29 @@ const App: React.FC = () => {
     { id: 'profile', label: 'Профиль', icon: '👤' },
   ]
 
-  // Handle suggestion completion
-  // const handleCompleteSuggestion = useCallback((suggestion: Suggestion) => {
-  //   // Add as completed suggestion
-  //   const newCompleted = [...completedSuggestionIds, suggestion.id]
-  //   safeSet('gropy-completed-suggestions', newCompleted)
-
-  //   // Add points
-  //   const points = suggestion.energy === 'easy' ? 1 : suggestion.energy === 'medium' ? 2 : 3
-  //   addPoints(points)
-
-  //   // Celebrate
-  //   celebrateCompletion()
-  //   setShowVictoryBubble(true)
-
-  //   // Show toast with undo
-  //   showToast(`готово! +${points}⚡`, {
-  //     action: {
-  //       label: 'отменить',
-  //       onAction: () => {
-  //         // Undo: remove from completed, subtract points
-  //         const updatedCompleted = newCompleted.filter(id => id !== suggestion.id)
-  //         safeSet('gropy-completed-suggestions', updatedCompleted)
-  //         // Note: In a real app, you'd need to track and undo the points too
-  //       },
-  //     },
-  //   })
-  // }, [completedSuggestionIds, addPoints, celebrateCompletion, showToast])
-
-  // Handle suggestion skip
-  // const handleSkipSuggestion = useCallback((_suggestion: Suggestion) => {
-  //   // Just skip, no action needed
-  // }, [])
-
   // Handle ritual completion
   const handleCompleteRitual = useCallback((ritualId: string) => {
     const success = completeRitual(ritualId)
     if (success) {
-      addPoints(1) // Give points for ritual completion
+      addPoints(RITUAL_COMPLETION_POINTS)
       celebrateCompletion()
       setShowVictoryBubble(true)
-      // setPetMood('excited') // Temporarily disabled
-
-
-      // Reset pet mood after celebration - temporarily disabled
-      // setTimeout(() => {
-      //   setPetMood('happy')
-      // }, 3000)
     }
   }, [completeRitual, addPoints, celebrateCompletion])
 
   // Handle diary entry save
   const handleSaveDiaryEntry = useCallback(async (entry: { mood: string }) => {
     showToast('запись сохранена 💚')
-
-    // Update pet mood based on emotion - temporarily disabled
-    // if (entry.mood === 'sun' || entry.mood === 'rainbow' || entry.mood === 'stars') {
-    //   setPetMood('happy')
-    // } else if (entry.mood === 'rain' || entry.mood === 'storm' || entry.mood === 'clouds') {
-    //   setPetMood('calm')
-    // } else if (entry.mood === 'wind' || entry.mood === 'moon') {
-    //   setPetMood('sleepy')
-    // } else {
-    //   setPetMood('happy')
-    // }
-
     return entry
   }, [showToast])
 
-  // Handle todo completion
-  // const handleToggleTodo = useCallback((id: string) => {
-  //   const todo = todos.find(t => t.id === id)
-  //   if (todo) {
-  //     toggleTodo(id)
-  //     if (!todo.completed) {
-  //       addPoints(todo.points)
-  //       celebrateCompletion()
-  //     }
-  //   }
-  // }, [todos, toggleTodo, addPoints, celebrateCompletion])
-
-  // Handle clear completed todos
-  // const handleClearCompleted = useCallback(() => {
-  //   const clearedTodos = clearCompleted()
-  //
-  //   showToast('Очищено. Вернуть?', {
-  //     action: {
-  //       label: 'Вернуть',
-  //       onAction: () => {
-  //         restoreCompleted(clearedTodos)
-  //       },
-  //     },
-  //   })
-  //
-  //   return clearedTodos
-  // }, [clearCompleted, restoreCompleted, showToast])
-
   // Handle shop purchase
   const handlePurchase = useCallback((itemId: string) => {
-    // This would need proper item pricing logic
-    const success = spendPoints(10) // Example price
+    const success = spendPoints(DEFAULT_SHOP_ITEM_PRICE)
     if (success) {
       const newOwned = [...ownedItems, itemId]
       setOwnedItems(newOwned)
-      safeSet('gropy-owned-items', newOwned)
+      safeSet(STORAGE_KEYS.OWNED_ITEMS, newOwned)
       showToast('покупка совершена! 🎉')
     } else {
       showToast('недостаточно очков')
@@ -207,6 +124,7 @@ const App: React.FC = () => {
       ownedItems,
       completedSuggestions: completedSuggestionIds,
       exportDate: new Date().toISOString(),
+      version: EXPORT_DATA_VERSION,
     }
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -214,7 +132,9 @@ const App: React.FC = () => {
     const a = document.createElement('a')
     a.href = url
     a.download = `gropy-backup-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
     showToast('данные экспортированы! 📤')
@@ -223,10 +143,47 @@ const App: React.FC = () => {
   // Handle data import
   const handleImportData = useCallback((dataString: string) => {
     try {
-      JSON.parse(dataString)
-      // This would need proper validation and import logic
+      const parsed = JSON.parse(dataString)
+      
+      // Validate imported data
+      const validation = validateImportData(parsed)
+      if (!validation.isValid) {
+        showToast(`ошибка валидации: ${validation.error}`)
+        return
+      }
+
+      // Sanitize and import data
+      const sanitized = sanitizeImportData(parsed)
+      
+      // Import todos if present
+      if (sanitized.todos && Array.isArray(sanitized.todos)) {
+        safeSet(STORAGE_KEYS.TODOS, sanitized.todos)
+      }
+
+      // Import game state if present
+      if (sanitized.gameState) {
+        safeSet(STORAGE_KEYS.GAME_STATE, sanitized.gameState)
+      }
+
+      // Import owned items if present
+      if (sanitized.ownedItems && Array.isArray(sanitized.ownedItems)) {
+        setOwnedItems(sanitized.ownedItems)
+        safeSet(STORAGE_KEYS.OWNED_ITEMS, sanitized.ownedItems)
+      }
+
+      // Import completed suggestions if present
+      if (sanitized.completedSuggestions && Array.isArray(sanitized.completedSuggestions)) {
+        safeSet(STORAGE_KEYS.COMPLETED_SUGGESTIONS, sanitized.completedSuggestions)
+      }
+
       showToast('данные импортированы! 📥')
-    } catch {
+      
+      // Reload to apply changes
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
+    } catch (error) {
+      console.error('Import error:', error)
       showToast('ошибка при импорте данных')
     }
   }, [showToast])
@@ -268,7 +225,7 @@ const App: React.FC = () => {
     // Hard refresh to ensure all hooks reinitialize from clean storage
     setTimeout(() => {
       window.location.reload()
-    }, 250)
+    }, RESET_RELOAD_DELAY)
   }, [resetAllTodos, resetGameState, showToast])
 
   // Hide victory bubble after showing
@@ -276,7 +233,7 @@ const App: React.FC = () => {
     if (showVictoryBubble) {
       const timer = setTimeout(() => {
         setShowVictoryBubble(false)
-      }, 3000)
+      }, VICTORY_BUBBLE_DURATION)
       return () => clearTimeout(timer)
     }
     return undefined
@@ -290,7 +247,7 @@ const App: React.FC = () => {
             <TasksPager
               completedRituals={completedRituals}
               onCompleteRitual={handleCompleteRitual}
-              maxDailyRituals={3}
+              maxDailyRituals={MAX_DAILY_RITUALS}
             />
           </Suspense>
         )
@@ -300,7 +257,7 @@ const App: React.FC = () => {
             <ExercisesPager
               completedRituals={completedRituals}
               onCompleteRitual={handleCompleteRitual}
-              maxDailyRituals={3}
+              maxDailyRituals={MAX_DAILY_RITUALS}
             />
           </Suspense>
         )
@@ -364,14 +321,6 @@ const App: React.FC = () => {
           {renderContent()}
         </MainContent>
 
-        {/* Pet component temporarily disabled
-        <Pet
-          showVictoryBubble={showVictoryBubble}
-          onVictoryBubbleShown={() => setShowVictoryBubble(false)}
-          petMood={petMood}
-        />
-        */}
-
         <EdgePeek />
 
         <Toast toasts={toasts} onHide={hideToast} />
@@ -379,7 +328,7 @@ const App: React.FC = () => {
         <BottomNavigation
           items={navItems}
           activeItem={activeTab}
-          onItemClick={(itemId) => setActiveTab(itemId as ActiveTab)}
+          onItemClick={(itemId: string) => setActiveTab(itemId as ActiveTab)}
           {...preloadOnHover(() => import('./components/TasksPager'))}
           {...preloadOnHover(() => import('./components/ExercisesPager'))}
           {...preloadOnHover(() => import('./components/EmotionalDiary'))}

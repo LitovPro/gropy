@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Todo, Category, Energy } from '../types'
 import { safeGet, safeSet } from '../utils/ls'
 import { validateTodoText } from '../utils/security'
-
-const STORAGE_KEY = 'gropy-todos'
+import { STORAGE_KEYS } from '../constants'
 
 const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).slice(2)
@@ -13,13 +12,13 @@ export const useTodos = () => {
   const [todos, setTodos] = useState<Todo[]>([])
 
   useEffect(() => {
-    const savedTodos = safeGet<Todo[]>(STORAGE_KEY, [])
+    const savedTodos = safeGet<Todo[]>(STORAGE_KEYS.TODOS, [])
     setTodos(savedTodos)
   }, [])
 
   const saveTodos = useCallback((newTodos: Todo[]) => {
     setTodos(newTodos)
-    safeSet(STORAGE_KEY, newTodos)
+    safeSet(STORAGE_KEYS.TODOS, newTodos)
   }, [])
 
   const addTodo = useCallback(

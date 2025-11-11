@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { safeGet, safeSet } from '../utils/ls'
+import { STORAGE_KEYS, MAX_DAILY_RITUALS } from '../constants'
 
 interface RitualEntry {
   id: string
@@ -24,9 +25,9 @@ export const useRituals = () => {
 
   // Load data from localStorage
   useEffect(() => {
-    const savedRituals = safeGet<string[]>('gropy-completed-rituals', [])
-    const savedDiary = safeGet<DiaryEntry[]>('gropy-diary-entries', [])
-    const savedStreak = safeGet<number>('gropy-daily-streak', 0)
+    const savedRituals = safeGet<string[]>(STORAGE_KEYS.COMPLETED_RITUALS, [])
+    const savedDiary = safeGet<DiaryEntry[]>(STORAGE_KEYS.DIARY_ENTRIES, [])
+    const savedStreak = safeGet<number>(STORAGE_KEYS.DAILY_STREAK, 0)
 
     setCompletedRituals(savedRituals)
     setDiaryEntries(savedDiary)
@@ -36,7 +37,7 @@ export const useRituals = () => {
   // Check if user has completed rituals today
   const hasCompletedToday = useCallback(() => {
     const today = new Date().toDateString()
-    const todayRituals = safeGet<RitualEntry[]>('gropy-ritual-history', [])
+    const todayRituals = safeGet<RitualEntry[]>(STORAGE_KEYS.RITUAL_HISTORY, [])
       .filter(entry => new Date(entry.date).toDateString() === today)
     
     return todayRituals.length > 0
@@ -49,10 +50,10 @@ export const useRituals = () => {
     
     // Save to daily completed rituals
     setCompletedRituals(newCompleted)
-    safeSet('gropy-completed-rituals', newCompleted)
+    safeSet(STORAGE_KEYS.COMPLETED_RITUALS, newCompleted)
 
     // Add to ritual history
-    const ritualHistory = safeGet<RitualEntry[]>('gropy-ritual-history', [])
+    const ritualHistory = safeGet<RitualEntry[]>(STORAGE_KEYS.RITUAL_HISTORY, [])
     const newEntry: RitualEntry = {
       id: `${ritualId}-${Date.now()}`,
       date: today,
@@ -61,13 +62,13 @@ export const useRituals = () => {
     }
     
     const updatedHistory = [...ritualHistory, newEntry]
-    safeSet('gropy-ritual-history', updatedHistory)
+    safeSet(STORAGE_KEYS.RITUAL_HISTORY, updatedHistory)
 
     // Update streak
     if (!hasCompletedToday()) {
       const newStreak = dailyStreak + 1
       setDailyStreak(newStreak)
-      safeSet('gropy-daily-streak', newStreak)
+      safeSet(STORAGE_KEYS.DAILY_STREAK, newStreak)
     }
 
     return true
@@ -86,7 +87,7 @@ export const useRituals = () => {
 
     const updatedEntries = [newEntry, ...diaryEntries]
     setDiaryEntries(updatedEntries)
-    safeSet('gropy-diary-entries', updatedEntries)
+    safeSet(STORAGE_KEYS.DIARY_ENTRIES, updatedEntries)
 
     return newEntry
   }, [diaryEntries])
@@ -94,19 +95,19 @@ export const useRituals = () => {
   // Reset daily rituals (called at midnight or new day)
   const resetDailyRituals = useCallback(() => {
     setCompletedRituals([])
-    safeSet('gropy-completed-rituals', [])
+    safeSet(STORAGE_KEYS.COMPLETED_RITUALS, [])
   }, [])
 
   // Get today's progress
   const getTodayProgress = useCallback(() => {
     const today = new Date().toDateString()
-    const todayRituals = safeGet<RitualEntry[]>('gropy-ritual-history', [])
+    const todayRituals = safeGet<RitualEntry[]>(STORAGE_KEYS.RITUAL_HISTORY, [])
       .filter(entry => new Date(entry.date).toDateString() === today)
     
     return {
       completed: todayRituals.length,
-      maxDaily: 3,
-      remaining: Math.max(0, 3 - todayRituals.length),
+      maxDaily: MAX_DAILY_RITUALS,
+      remaining: Math.max(0, MAX_DAILY_RITUALS - todayRituals.length),
     }
   }, [])
 
@@ -115,7 +116,7 @@ export const useRituals = () => {
     const weekAgo = new Date()
     weekAgo.setDate(weekAgo.getDate() - 7)
     
-    const weekRituals = safeGet<RitualEntry[]>('gropy-ritual-history', [])
+    const weekRituals = safeGet<RitualEntry[]>(STORAGE_KEYS.RITUAL_HISTORY, [])
       .filter(entry => new Date(entry.date) >= weekAgo)
     
     const weekDiary = diaryEntries.filter(entry => 

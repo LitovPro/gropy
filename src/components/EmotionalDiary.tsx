@@ -65,13 +65,13 @@ const EmotionsGrid = styled.div`
   }
 `
 
-const EmotionCard = styled(motion.div)<{ isSelected: boolean }>`
-  background: ${({ theme, isSelected }) =>
-    isSelected
+const EmotionCard = styled(motion.div)<{ $isSelected: boolean }>`
+  background: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `linear-gradient(135deg, ${theme.color.pet.accent}20, ${theme.color.warm.medium}20)`
       : theme.color.surface};
-  border: 3px solid ${({ theme, isSelected }) =>
-    isSelected ? theme.color.pet.accent : theme.color.border};
+  border: 3px solid ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.pet.accent : theme.color.border};
   border-radius: ${tokens.radius.card};
   padding: ${tokens.space.lg};
   text-align: center;
@@ -84,8 +84,8 @@ const EmotionCard = styled(motion.div)<{ isSelected: boolean }>`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: ${({ theme, isSelected }) =>
-    isSelected
+  box-shadow: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `0 4px 16px ${theme.color.pet.accent}30`
       : `0 2px 8px ${theme.color.border}20`};
   padding: ${tokens.space.md} ${tokens.space.xs};
@@ -103,7 +103,7 @@ const EmotionCard = styled(motion.div)<{ isSelected: boolean }>`
     right: 0;
     bottom: 0;
     background: linear-gradient(135deg, ${({ theme }) => theme.color.warm.light}10, transparent);
-    opacity: ${({ isSelected }) => isSelected ? 1 : 0};
+    opacity: ${({ $isSelected }) => $isSelected ? 1 : 0};
     transition: opacity ${tokens.motion.base} ${tokens.motion.easing};
   }
 
@@ -181,15 +181,15 @@ const IntensitySlider = styled.div`
   margin-bottom: ${tokens.space.md};
 `
 
-const IntensityOption = styled(motion.button)<{ isSelected: boolean }>`
-  background: ${({ theme, isSelected }) =>
-    isSelected
+const IntensityOption = styled(motion.button)<{ $isSelected: boolean }>`
+  background: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `linear-gradient(135deg, ${theme.color.pet.primary}, ${theme.color.warm.medium})`
       : theme.color.bg};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? 'white' : theme.color.text};
-  border: 3px solid ${({ theme, isSelected }) =>
-    isSelected ? theme.color.pet.primary : theme.color.border};
+  color: ${({ theme, $isSelected }) =>
+    $isSelected ? 'white' : theme.color.text};
+  border: 3px solid ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.pet.primary : theme.color.border};
   border-radius: ${tokens.radius.button};
   padding: ${tokens.space.md} ${tokens.space.lg};
   min-height: 44px;
@@ -200,15 +200,15 @@ const IntensityOption = styled(motion.button)<{ isSelected: boolean }>`
     min-height: 40px;
     font-size: ${tokens.typography.fontSize.xs};
   }
-  font-weight: ${({ isSelected }) =>
-    isSelected ? tokens.typography.fontWeight.semibold : tokens.typography.fontWeight.medium};
+  font-weight: ${({ $isSelected }) =>
+    $isSelected ? tokens.typography.fontWeight.semibold : tokens.typography.fontWeight.medium};
   font-family: ${tokens.typography.fontFamily.primary};
   cursor: pointer;
   transition: all ${tokens.motion.fast} ${tokens.motion.easing};
   position: relative;
   overflow: hidden;
-  box-shadow: ${({ theme, isSelected }) =>
-    isSelected
+  box-shadow: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `0 4px 12px ${theme.color.pet.primary}40`
       : `0 2px 6px ${theme.color.border}20`};
 
@@ -273,20 +273,20 @@ const ChipsContainer = styled.div`
   margin-bottom: ${tokens.space.md};
 `
 
-const Chip = styled(motion.button)<{ isSelected: boolean }>`
-  background: ${({ theme, isSelected }) =>
-    isSelected
+const Chip = styled(motion.button)<{ $isSelected: boolean }>`
+  background: ${({ theme, $isSelected }) =>
+    $isSelected
       ? `linear-gradient(135deg, ${theme.color.pet.accent}15, ${theme.color.warm.medium}15)`
       : theme.color.bg};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color.pet.accent : theme.color.text};
-  border: 2px solid ${({ theme, isSelected }) =>
-    isSelected ? theme.color.pet.accent : theme.color.border};
+  color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.pet.accent : theme.color.text};
+  border: 2px solid ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.pet.accent : theme.color.border};
   border-radius: ${tokens.radius.button};
   padding: ${tokens.space.sm} ${tokens.space.md};
   font-size: ${tokens.typography.fontSize.sm};
-  font-weight: ${({ isSelected }) =>
-    isSelected ? tokens.typography.fontWeight.semibold : tokens.typography.fontWeight.normal};
+  font-weight: ${({ $isSelected }) =>
+    $isSelected ? tokens.typography.fontWeight.semibold : tokens.typography.fontWeight.normal};
   font-family: ${tokens.typography.fontFamily.primary};
   cursor: pointer;
   transition: all ${tokens.motion.fast} ${tokens.motion.easing};
@@ -305,15 +305,15 @@ const Chip = styled(motion.button)<{ isSelected: boolean }>`
   }
 
   &:hover {
-    background: ${({ theme, isSelected }) =>
-      isSelected
+    background: ${({ theme, $isSelected }) =>
+      $isSelected
         ? `linear-gradient(135deg, ${theme.color.pet.accent}25, ${theme.color.warm.medium}25)`
         : theme.color.surface};
-    border-color: ${({ theme, isSelected }) =>
-      isSelected ? theme.color.pet.accent : theme.color.pet.accent};
+    border-color: ${({ theme, $isSelected }) =>
+      $isSelected ? theme.color.pet.accent : theme.color.pet.accent};
     transform: translateY(-1px);
-    box-shadow: ${({ theme, isSelected }) =>
-      isSelected
+    box-shadow: ${({ theme, $isSelected }) =>
+      $isSelected
         ? `0 4px 12px ${theme.color.pet.accent}30`
         : `0 2px 8px ${theme.color.border}40`};
 
@@ -484,7 +484,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = React.memo(({
     setCurrentPrompt(null)
     setSelectedChips([])
     setNote('')
-    setPetReaction(null)
+    // pet reaction temporarily disabled
     playButtonClick()
   }, [])
 
@@ -584,7 +584,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = React.memo(({
         {moods.map((mood) => (
           <EmotionCard
             key={mood}
-            isSelected={selectedMood === mood}
+            $isSelected={selectedMood === mood}
             onClick={() => handleMoodSelect(mood)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -610,7 +610,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = React.memo(({
               {([1, 2, 3] as Intensity[]).map((intensity) => (
                 <IntensityOption
                   key={intensity}
-                  isSelected={selectedIntensity === intensity}
+                  $isSelected={selectedIntensity === intensity}
                   onClick={() => handleIntensitySelect(intensity)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -640,7 +640,7 @@ export const EmotionalDiary: React.FC<EmotionalDiaryProps> = React.memo(({
                 {currentPrompt.chips.map((chip: string) => (
                   <Chip
                     key={chip}
-                    isSelected={selectedChips.includes(chip)}
+                    $isSelected={selectedChips.includes(chip)}
                     onClick={() => handleChipSelect(chip)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

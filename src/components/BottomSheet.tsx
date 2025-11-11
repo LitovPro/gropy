@@ -43,6 +43,7 @@ const SheetContent = styled(motion.div)`
   max-height: 85vh;
   overflow-y: auto;
   will-change: transform;
+  transform: translateZ(0);
 `;
 
 const GripArea = styled.div<{ $isDragging: boolean }>`
@@ -52,6 +53,8 @@ const GripArea = styled.div<{ $isDragging: boolean }>`
   padding: 12px 0;
   cursor: ${({ $isDragging }) => ($isDragging ? "grabbing" : "grab")};
   user-select: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 `;
 
 const Grip = styled.div`
@@ -68,6 +71,8 @@ export const BottomSheet = React.memo(function BottomSheet({ open, onClose, chil
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      // Сбрасываем позицию листа при открытии, чтобы исключить артефакты
+      y.set(0);
     } else {
       document.body.style.overflow = "";
     }
@@ -102,13 +107,12 @@ export const BottomSheet = React.memo(function BottomSheet({ open, onClose, chil
               aria-label={ariaLabel}
               drag="y"
               dragDirectionLock
-              dragElastic={{ top: 0, bottom: 0.25 }}
-              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0}
+              dragConstraints={{ top: 0, bottom: (typeof window !== 'undefined' ? window.innerHeight : 800) }}
               dragMomentum={false}
               style={{ y }}
               initial={{ y: 0 }} // мгновенное появление в финальной позиции
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
               transition={{
                 duration: 0.2,
                 ease: [0.4, 0, 0.2, 1],
@@ -125,9 +129,9 @@ export const BottomSheet = React.memo(function BottomSheet({ open, onClose, chil
                   } catch {
                     // Ignore haptic feedback errors
                   }
-                  // Плавное закрытие вниз
+                  // Плавное закрытие вниз вручную, затем закрываем
                   await animate(y, window.innerHeight, {
-                    duration: 0.2,
+                    duration: 0.22,
                     ease: [0.4, 0, 0.2, 1],
                   });
                   onClose();

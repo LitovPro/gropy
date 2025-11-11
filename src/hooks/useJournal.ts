@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { JournalEntry, JournalState, Mood, Intensity, Prompt, Ritual } from '../types/journal'
 import { PROMPTS, RITUALS, PET_REACTIONS } from '../data/journalData'
-
-const STORAGE_KEY = 'gropy-journal-state'
+import { STORAGE_KEYS } from '../constants'
 
 // Initialize default state
 const defaultState: JournalState = {
@@ -18,7 +17,7 @@ export const useJournal = () => {
   // Load state from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY)
+      const saved = localStorage.getItem(STORAGE_KEYS.JOURNAL_STATE)
       if (saved) {
         const parsed = JSON.parse(saved)
         setState(parsed)
@@ -33,7 +32,7 @@ export const useJournal = () => {
   // Save state to localStorage
   const saveState = useCallback((newState: JournalState) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState))
+      localStorage.setItem(STORAGE_KEYS.JOURNAL_STATE, JSON.stringify(newState))
       setState(newState)
     } catch {
       // Failed to save journal state
@@ -74,7 +73,7 @@ export const useJournal = () => {
           ...state,
           entries: [entry, ...state.entries]
         }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState))
+        localStorage.setItem(STORAGE_KEYS.JOURNAL_STATE, JSON.stringify(newState))
       } catch {
         // Failed to save journal state
       }

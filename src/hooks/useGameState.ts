@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { GameState } from '../types'
 import { safeGet, safeSet } from '../utils/ls'
-
-const STORAGE_KEY = 'gropy-game-state'
+import { STORAGE_KEYS } from '../constants'
 
 const getTodayUTC = (): string => {
-  return new Date().toISOString().split('T')[0]
+  return new Date().toISOString().split('T')[0] || ''
 }
 
 const calculateExpForNextLevel = (level: number): number => {
@@ -25,13 +24,13 @@ export const useGameState = () => {
   const [gameState, setGameState] = useState<GameState>(defaultGameState)
 
   useEffect(() => {
-    const saved = safeGet<GameState>(STORAGE_KEY, defaultGameState)
+    const saved = safeGet<GameState>(STORAGE_KEYS.GAME_STATE, defaultGameState)
     setGameState(saved)
   }, [])
 
   const saveGameState = useCallback((newState: GameState) => {
     setGameState(newState)
-    safeSet(STORAGE_KEY, newState)
+    safeSet(STORAGE_KEYS.GAME_STATE, newState)
   }, [])
 
   const addPoints = useCallback(

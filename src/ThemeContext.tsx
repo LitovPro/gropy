@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { ThemeProvider as StyledThemeProvider } from 'styled-components'
+import { ThemeProvider as StyledThemeProvider, StyleSheetManager } from 'styled-components'
 import { lightTheme, darkTheme, oceanTheme, forestTheme, Theme } from './styles/themes'
+import { STORAGE_KEYS } from './constants'
 
 type ThemeName = 'light' | 'dark' | 'ocean' | 'forest'
 
@@ -32,7 +33,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   const setTheme = (name: ThemeName) => {
     setThemeName(name)
     try {
-      localStorage.setItem('gropy-theme', name)
+      localStorage.setItem(STORAGE_KEYS.THEME, name)
     } catch {
       // Ignore localStorage errors
     }
@@ -41,7 +42,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // Load theme from localStorage after component mounts
     try {
-      const saved = localStorage.getItem('gropy-theme')
+      const saved = localStorage.getItem(STORAGE_KEYS.THEME)
       if (saved && themes[saved as ThemeName]) {
         setThemeName(saved as ThemeName)
       }
@@ -57,7 +58,35 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <ThemeContext.Provider value={{ theme, themeName, setTheme }}>
-      <StyledThemeProvider theme={theme}>{children}</StyledThemeProvider>
+      <StyleSheetManager
+        shouldForwardProp={(prop, element) => {
+          // Filter motion-specific props from reaching plain DOM nodes
+          // Keep everything for custom React components
+          if (typeof element !== 'string') return true
+          const blocked = new Set([
+            'initial',
+            'animate',
+            'exit',
+            'whileHover',
+            'whileTap',
+            'whileFocus',
+            'whileInView',
+            'transition',
+            'variants',
+            'layout',
+            'layoutId',
+            'drag',
+            'dragConstraints',
+            'dragElastic',
+            'dragMomentum',
+          ])
+          // Transient props ($prefix) should never reach DOM
+          if (prop.startsWith('$')) return false
+          return !blocked.has(prop)
+        }}
+      >
+        <StyledThemeProvider theme={theme}>{children}</StyledThemeProvider>
+      </StyleSheetManager>
     </ThemeContext.Provider>
   )
 }
